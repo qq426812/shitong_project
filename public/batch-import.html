@@ -20,7 +20,7 @@
   <pre id="log"></pre>
   <div id="records"></div>
 
-  <script>
+<script>
   let insertedIds = [];
 
   async function handleImport() {
@@ -31,7 +31,7 @@
     recordsDiv.innerHTML = "";
     insertedIds = [];
 
-    let jsonData = [];  // ✅ 提前声明，保证后面可用
+    let jsonData = []; // 提前声明并确保后面作用域能访问
 
     if (!fileInput.files[0]) return alert("请先选择一个 Excel 文件");
 
@@ -47,6 +47,7 @@
       if (!jsonData.length) return alert("Excel 文件中没有有效数据");
 
       log.textContent = `读取到 ${jsonData.length} 条记录，正在上传...\n`;
+      console.log("读取数据：", jsonData);
 
       const res = await fetch("/api/cert-batch", {
         method: "POST",
@@ -55,24 +56,49 @@
       });
 
       const result = await res.json();
+      console.log("导入响应：", result);
+
       if (result.success) {
         log.textContent += `✅ 成功导入 ${result.count} 条记录\n`;
 
         insertedIds = result.ids || [];
+        console.log("返回 IDs：", insertedIds);
 
-        if (insertedIds.length === 0) {
-          const latestRes = await fetch("/api/cert-latest?count=" + jsonData.length);
-          const latest = await latestRes.json();
-          if (latest.success) insertedIds = latest.ids;
+        if (!Array.isArray(insertedIds)) {
+          insertedIds = [];
         }
 
-        if (insertedIds.length > 0) showQrLinks(insertedIds);
-        else log.textContent += `⚠️ 无法获取证书 ID`;
+        if (insertedIds.length === 0) {
+          console.warn("返回为空 ID，尝试调用 cert-latest 接口");
+
+          // 👇 这里加入判断：jsonData 是否仍有效
+          if (!jsonData || !Array.isArray(jsonData)) {
+            log.textContent += `❌ jsonData 不存在或格式错误`;
+            return;
+          }
+
+          const latestRes = await fetch("/api/cert-latest?count=" + jsonData.length);
+          const latest = await latestRes.json();
+          console.log("获取最新 ID 返回：", latest);
+          if (latest.success && Array.isArray(latest.ids)) {
+            insertedIds = latest.ids;
+          } else {
+            log.textContent += `⚠️ cert-latest 接口无效返回`;
+          }
+        }
+
+        if (insertedIds.length > 0) {
+          showQrLinks(insertedIds);
+        } else {
+          log.textContent += `⚠️ 无法获取证书 ID`;
+        }
+
       } else {
         log.textContent += `❌ 导入失败：${result.error}`;
       }
+
     } catch (err) {
-      console.error(err);
+      console.error("处理过程中发生错误：", err);
       log.textContent += `❌ 程序异常：${err.message}`;
     }
   }
@@ -104,6 +130,7 @@
     });
   }
 </script>
+
 
 </body>
 </html>

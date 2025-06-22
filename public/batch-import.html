@@ -21,17 +21,12 @@
   <div id="records"></div>
 
 <script>
-  let insertedIds = [];
-
   async function handleImport() {
     const fileInput = document.getElementById("excelFile");
     const log = document.getElementById("log");
     const recordsDiv = document.getElementById("records");
     log.textContent = "";
     recordsDiv.innerHTML = "";
-    insertedIds = [];
-
-    let jsonData = [];
 
     if (!fileInput.files[0]) {
       alert("请先选择一个 Excel 文件");
@@ -49,7 +44,7 @@
       }
 
       const sheet = workbook.Sheets[sheetName];
-      jsonData = XLSX.utils.sheet_to_json(sheet);
+      const jsonData = XLSX.utils.sheet_to_json(sheet);
       if (!jsonData.length) {
         alert("Excel 文件中没有有效数据");
         return;
@@ -57,7 +52,7 @@
 
       log.textContent = `读取到 ${jsonData.length} 条记录，正在上传...\n`;
 
-      // 发送上传请求，后端返回最后插入的ID，例如 { success: true, lastId: 35, count: 10 }
+      // 上传数据，不管接口返回ID
       const res = await fetch("/api/cert-batch", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -66,25 +61,31 @@
 
       const result = await res.json();
 
-      if (result.success) {
-        log.textContent += `✅ 成功导入 ${result.count || jsonData.length} 条记录\n`;
-
-        const lastId = result.lastId;
-
-        if (typeof lastId === "number") {
-          const count = jsonData.length;
-          insertedIds = [];
-          // 假设数据库ID连续自增，从 lastId - count + 1 到 lastId
-          for (let i = lastId - count + 1; i <= lastId; i++) {
-            insertedIds.push(i);
-          }
-          showQrLinks(insertedIds);
-        } else {
-          log.textContent += "⚠️ 后端未返回最后插入ID，无法生成二维码\n";
-        }
-      } else {
+      if (!result.success) {
         log.textContent += `❌ 导入失败：${result.error || "未知错误"}\n`;
+        return;
       }
+
+      log.textContent += `✅ 成功导入 ${jsonData.length} 条记录\n`;
+
+      // 再调用 /api/cert-latest 获取最新ID
+      const latestRes = await fetch("/api/cert-latest");
+      const latest = await latestRes.json();
+
+      if (latest.success && typeof latest.id === "number") {
+        const lastId = latest.id;
+        const count = jsonData.length;
+        const insertedIds = [];
+
+        for (let i = lastId - count + 1; i <= lastId; i++) {
+          insertedIds.push(i);
+        }
+
+        showQrLinks(insertedIds);
+      } else {
+        log.textContent += "⚠️ 获取最新证书ID失败，无法生成二维码\n";
+      }
+
     } catch (err) {
       console.error(err);
       log.textContent += `❌ 程序异常：${err.message}\n`;
@@ -94,6 +95,7 @@
   function showQrLinks(ids) {
     const recordsDiv = document.getElementById("records");
     recordsDiv.innerHTML = "";
+
     ids.forEach(id => {
       const url = `${location.origin}/list.html?id=${id}`;
       const wrapper = document.createElement("div");

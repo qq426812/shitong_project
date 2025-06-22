@@ -49,7 +49,7 @@
 
       const result = await res.json();
       if (result.success) {
-        log.textContent += ✅ 成功导入 ${result.count} 条记录\n;
+      //  log.textContent += ✅ 成功导入 ${result.count} 条记录\n;
 
         // 假设后端返回 ids: [1, 2, 3...]
         insertedIds = result.ids || [];
@@ -62,7 +62,7 @@
 
         if (insertedIds.length > 0) showQrLinks(insertedIds);
       } else {
-        log.textContent += ❌ 导入失败：${result.error};
+       // log.textContent += ❌ 导入失败：${result.error};
       }
     }
 

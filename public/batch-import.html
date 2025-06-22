@@ -1,4 +1,26 @@
-<script>
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>批量导入证书</title>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <style>
+    body { font-family: sans-serif; max-width: 900px; margin: auto; padding: 20px; }
+    .record { margin-top: 20px; padding: 10px; border: 1px solid #ccc; border-radius: 6px; }
+    .qrcode { margin-top: 10px; text-align: center; }
+    .qrcode a { display: block; margin-top: 5px; word-break: break-all; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <h2>批量导入证书数据</h2>
+  <input type="file" id="excelFile" accept=".xlsx">
+  <button onclick="handleImport()">导入证书</button>
+  <pre id="log"></pre>
+  <div id="records"></div>
+
+  <script>
   let insertedIds = [];
 
   async function handleImport() {
@@ -82,3 +104,6 @@
     });
   }
 </script>
+
+</body>
+</html>

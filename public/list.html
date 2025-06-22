@@ -1,117 +1,113 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>证书信息查询</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #f8f9fa;
-      color: #333;
-    }
-
-    .container {
-      width: 90%;
-      max-width: 480px;
-      margin: 40px auto;
-      padding: 20px;
-      text-align: center;
-      background-color: #fff;
-      border-radius: 10px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    .logo {
-      max-width: 90px;
-      height: auto;
-      margin-bottom: 20px;
-    }
-
-    .title {
-      font-size: 1.4em;
-      font-weight: bold;
-      color: #000;
-      margin-bottom: 20px;
-      word-break: break-word;
-    }
-
-    .info {
-      text-align: left;
-      margin-top: 10px;
-    }
-
-    .info-item {
-      display: flex;
-      align-items: flex-start;
-      margin-bottom: 10px;
-      width: 100%;
-    }
-
-    .info-item span.label {
-      width: 100px;
-      flex-shrink: 0;
-      text-align: left;
-      font-weight: bold;
-      color: #333;
-    }
-
-    .info-item span.value {
-      flex-grow: 1;
-      text-align: left;
-      word-break: break-word;
-      white-space: pre-wrap;
-      overflow-wrap: break-word;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>证书信息查询</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        .container {
+            width: 90%;
+            max-width: 400px;
+            margin: 40px auto;
+            padding: 20px;
+            text-align: center;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .logo {
+            max-width: 90px;
+            height: auto;
+            margin-bottom: 20px;
+        }
+        .title {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #000;
+            margin-bottom: 20px;
+        }
+        .info {
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            padding: 10px 0;
+        }
+        .info-item {
+            padding: 5px 0;
+            margin-bottom: 8px;
+            text-align: center;
+            display: flex;
+            max-width: 350px;
+            justify-content: space-between;
+        }
+        .info-item span:first-child {
+            font-weight: bold;
+            color: #555;
+            min-width: 120px;
+            text-align: left;
+            flex-shrink: 0;
+        }
+        .info-item span.value {
+            text-align: left;
+            flex-grow: 1;
+            padding-left: 0;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <a href="https://smms.app/image/rAJF3Qu7GosCtk5" target="_blank">
-      <img src="https://s2.loli.net/2025/01/01/rAJF3Qu7GosCtk5.jpg" alt="logo.jpg" class="logo">
-    </a>
-    <div class="title">世通仪器检测服务有限公司</div>
-    <div class="info">
-      <div class="info-item"><span class="label">公司名称:</span><span class="value" id="certificate-unit">/</span></div>
-      <div class="info-item"><span class="label">设备名称:</span><span class="value" id="instrument-name">/</span></div>
-      <div class="info-item"><span class="label">出厂编号:</span><span class="value" id="serial-number">/</span></div>
-      <div class="info-item"><span class="label">管理编号:</span><span class="value" id="asset-number">/</span></div>
-      <div class="info-item"><span class="label">校准日期:</span><span class="value" id="calibration-date">/</span></div>
-      <div class="info-item"><span class="label">证书编号:</span><span class="value" id="certificate-number">/</span></div>
+    <div class="container">
+        <a href="https://smms.app/image/rAJF3Qu7GosCtk5" target="_blank">
+            <img src="https://s2.loli.net/2025/01/01/rAJF3Qu7GosCtk5.jpg" alt="logo.jpg" class="logo">
+        </a>
+        <div class="title">世通仪器检测服务有限公司</div>
+        <div class="info">
+            <div class="info-item"><span>公司名称:</span><span class="value" id="certificate-unit">/</span></div>
+            <div class="info-item"><span>设备名称:</span><span class="value" id="instrument-name">/</span></div>
+            <div class="info-item"><span>出厂编号:</span><span class="value" id="serial-number">/</span></div>
+            <div class="info-item"><span>管理编号:</span><span class="value" id="asset-number">/</span></div>
+            <div class="info-item"><span>校准日期:</span><span class="value" id="calibration-date">/</span></div>
+            <div class="info-item"><span>证书编号:</span><span class="value" id="certificate-number">/</span></div>
+        </div>
     </div>
-  </div>
 
   <script>
-    async function renderDataFromApi() {
-      const params = new URLSearchParams(location.search);
-      const id = params.get("id");
+async function renderDataFromApi() {
+  const params = new URLSearchParams(location.search);
+  const id = params.get("id");
 
-      if (!id) {
-        alert("链接中缺少 id 参数");
-        return;
-      }
+  if (!id) {
+    alert("链接中缺少 id 参数"); return;
+  }
 
-      const res = await fetch(`/api/cert-get?id=${id}`);
-      const result = await res.json();
+  const res = await fetch(/api/cert-get?id=${id});
+  const result = await res.json();
 
-      if (!result.success) {
-        alert("获取数据失败：" + result.error);
-        return;
-      }
+  if (!result.success) {
+    alert("获取数据失败：" + result.error);
+    return;
+  }
 
-      const data = result.data;
+  const data = result.data;
 
-      document.getElementById("certificate-unit").textContent = data.certificate_unit || '/';
-      document.getElementById("instrument-name").textContent = data.instrument_name || '/';
-      document.getElementById("serial-number").textContent = data.serial_number || '/';
-      document.getElementById("asset-number").textContent = data.asset_number || '/';
-      document.getElementById("calibration-date").textContent = data.calibration_date || '/';
-      document.getElementById("certificate-number").textContent = data.certificate_number || '/';
-    }
+  document.getElementById("certificate-unit").textContent = data.certificate_unit || '/';
+  document.getElementById("instrument-name").textContent = data.instrument_name || '/';
+  document.getElementById("serial-number").textContent = data.serial_number || '/';
+  document.getElementById("asset-number").textContent = data.asset_number || '/';
+  document.getElementById("calibration-date").textContent = data.calibration_date || '/';
+  document.getElementById("certificate-number").textContent = data.certificate_number || '/';
+}
 
-    renderDataFromApi();
-  </script>
+renderDataFromApi();
+</script>
+
 </body>
 </html>

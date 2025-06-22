@@ -33,36 +33,44 @@
 
       if (!fileInput.files[0]) return alert("请先选择一个 Excel 文件");
 
-      const file = fileInput.files[0];
-      const data = await file.arrayBuffer();
-      const workbook = XLSX.read(data, { type: "array" });
-      const sheet = workbook.Sheets[workbook.SheetNames[0]];
-      const jsonData = XLSX.utils.sheet_to_json(sheet);
+      try {
+        const file = fileInput.files[0];
+        const data = await file.arrayBuffer();
+        const workbook = XLSX.read(data, { type: "array" });
+        const sheetName = workbook.SheetNames[0];
+        if (!sheetName) return alert("Excel 文件中未找到任何工作表");
 
-      log.textContent = `读取到 ${jsonData.length} 条记录，正在上传...\n`;
+        const sheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(sheet);
+        if (!jsonData.length) return alert("Excel 文件中没有有效数据");
 
-      const res = await fetch("/api/cert-batch", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ records: jsonData })
-      });
+        log.textContent = `读取到 ${jsonData.length} 条记录，正在上传...\n`;
 
-      const result = await res.json();
-      if (result.success) {
-        log.textContent += `✅ 成功导入 ${result.count} 条记录\n`;
+        const res = await fetch("/api/cert-batch", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ records: jsonData })
+        });
 
-        // 假设后端返回 ids: [1, 2, 3...]
-        insertedIds = result.ids || [];
-        if (insertedIds.length === 0) {
-          // 如果没有返回 ID，则默认用前 N 个最新 ID
-          const latestRes = await fetch("/api/cert-latest?count=" + jsonData.length);
-          const latest = await latestRes.json();
-          if (latest.success) insertedIds = latest.ids;
+        const result = await res.json();
+        if (result.success) {
+          log.textContent += `✅ 成功导入 ${result.count} 条记录\n`;
+
+          insertedIds = result.ids || [];
+          if (insertedIds.length === 0) {
+            const latestRes = await fetch("/api/cert-latest?count=" + jsonData.length);
+            const latest = await latestRes.json();
+            if (latest.success) insertedIds = latest.ids;
+          }
+
+          if (insertedIds.length > 0) showQrLinks(insertedIds);
+          else log.textContent += `⚠️ 无法获取证书 ID`;
+        } else {
+          log.textContent += `❌ 导入失败：${result.error}`;
         }
-
-        if (insertedIds.length > 0) showQrLinks(insertedIds);
-      } else {
-        log.textContent += `❌ 导入失败：${result.error}`;
+      } catch (err) {
+        console.error(err);
+        log.textContent += `❌ 程序异常：${err.message}`;
       }
     }
 

@@ -39,7 +39,7 @@
       const sheet = workbook.Sheets[workbook.SheetNames[0]];
       const jsonData = XLSX.utils.sheet_to_json(sheet);
 
-      //log.textContent = 读取到 ${jsonData.length} 条记录，正在上传...\n;
+      log.textContent = `读取到 ${jsonData.length} 条记录，正在上传...\n`;
 
       const res = await fetch("/api/cert-batch", {
         method: "POST",
@@ -49,7 +49,7 @@
 
       const result = await res.json();
       if (result.success) {
-      //  log.textContent += ✅ 成功导入 ${result.count} 条记录\n;
+        log.textContent += `✅ 成功导入 ${result.count} 条记录\n`;
 
         // 假设后端返回 ids: [1, 2, 3...]
         insertedIds = result.ids || [];
@@ -62,7 +62,7 @@
 
         if (insertedIds.length > 0) showQrLinks(insertedIds);
       } else {
-       // log.textContent += ❌ 导入失败：${result.error};
+        log.textContent += `❌ 导入失败：${result.error}`;
       }
     }
 
@@ -70,7 +70,7 @@
       const recordsDiv = document.getElementById("records");
       recordsDiv.innerHTML = "";
       ids.forEach(id => {
-        const url = ${location.origin}/list.html?id=${id};
+        const url = `${location.origin}/list.html?id=${id}`;
         const wrapper = document.createElement("div");
         wrapper.className = "record";
 
@@ -87,7 +87,7 @@
         qrDiv.appendChild(qrCanvas);
         qrDiv.appendChild(link);
 
-        wrapper.appendChild(document.createTextNode(证书 ID: ${id}));
+        wrapper.appendChild(document.createTextNode(`证书 ID: ${id}`));
         wrapper.appendChild(qrDiv);
         recordsDiv.appendChild(wrapper);
       });

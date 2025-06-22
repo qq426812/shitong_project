@@ -1,0 +1,46 @@
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>后台管理</title>
+</head>
+<body>
+  <h2>后台数据管理</h2>
+  <table border="1" cellpadding="5">
+    <thead><tr><th>ID</th><th>单位</th><th>设备</th><th>操作</th></tr></thead>
+    <tbody id="dataList"></tbody>
+  </table>
+  <script>
+    async function loadAll() {
+      const res = await fetch("/api/cert-all");
+      const result = await res.json();
+      if (!result.success) return alert("加载失败");
+      document.getElementById("dataList").innerHTML = result.data.map(row => `
+        <tr>
+          <td>${row.id}</td>
+          <td>${row.certificate_unit}</td>
+          <td>${row.instrument_name}</td>
+          <td>
+            <button onclick="edit(${row.id})">编辑</button>
+            <button onclick="del(${row.id})">删除</button>
+          </td>
+        </tr>`).join('');
+    }
+    function edit(id) {
+      const newUnit = prompt("修改公司名称：");
+      if (newUnit) {
+        fetch("/api/cert-update", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({ id, certificate_unit: newUnit })
+        }).then(loadAll);
+      }
+    }
+    function del(id) {
+      if (confirm("确认删除？")) {
+        fetch(`/api/cert-delete?id=${id}`, { method: "DELETE" }).then(loadAll);
+      }
+    }
+    loadAll();
+  </script>
+</body>
+</html>

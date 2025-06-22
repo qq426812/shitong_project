@@ -1,0 +1,55 @@
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>提交数据并生成二维码</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <style>
+    body { font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; }
+    input, button { padding: 8px; margin: 5px 0; width: 100%; }
+    #qrcode { margin-top: 20px; text-align: center; }
+  </style>
+</head>
+<body>
+  <h2>提交内容</h2>
+  <textarea id="content" rows="4" placeholder="请输入内容"></textarea>
+  <button id="submitBtn">提交内容</button>
+  <button id="generateBtn">生成二维码</button>
+  <div id="qrcode"></div>
+  <script>
+    const submitBtn = document.getElementById("submitBtn");
+    const generateBtn = document.getElementById("generateBtn");
+    const contentInput = document.getElementById("content");
+    const qrcodeDiv = document.getElementById("qrcode");
+
+    submitBtn.onclick = async () => {
+      const content = contentInput.value.trim();
+      if (!content) return alert("请输入内容");
+      const response = await fetch("/api/cert-upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content })
+      });
+      const result = await response.json();
+      if (result.success) {
+        alert("提交成功！");
+      } else {
+        alert("提交失败：" + result.error);
+      }
+    };
+
+    generateBtn.onclick = async () => {
+      const response = await fetch("/api/cert-latest");
+      const result = await response.json();
+      if (result.success && result.id) {
+        const url = `${location.origin}/list.html?id=${result.id}`;
+        qrcodeDiv.innerHTML = "";
+        QRCode.toCanvas(document.createElement("canvas"), url, (err, canvas) => {
+          if (!err) qrcodeDiv.appendChild(canvas);
+        });
+      } else {
+        alert("获取最新数据失败：" + result.error);
+      }
+    };
+  </script>
+</body>
+</html>

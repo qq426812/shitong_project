@@ -1,0 +1,32 @@
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>证书信息查询</title>
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #f8f9fa; color: #333; margin: 0; padding: 0; }
+    .container { width: 90%; max-width: 400px; margin: 40px auto; padding: 20px; background-color: #fff; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; }
+    .info-item { margin: 10px 0; display: flex; justify-content: space-between; }
+    .info-item span:first-child { font-weight: bold; color: #555; min-width: 100px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>证书信息</h2>
+    <div id="info">加载中...</div>
+  </div>
+  <script>
+    async function loadData() {
+      const id = new URLSearchParams(location.search).get("id");
+      if (!id) return document.getElementById("info").textContent = "无效 ID";
+      const res = await fetch(`/api/cert-get?id=${id}`);
+      const result = await res.json();
+      if (!result.success) return document.getElementById("info").textContent = "数据加载失败";
+      const data = result.data;
+      const container = Object.entries(data).map(([k, v]) => `<div class='info-item'><span>${k}:</span><span>${v}</span></div>`).join('');
+      document.getElementById("info").innerHTML = container;
+    }
+    loadData();
+  </script>
+</body>
+</html>

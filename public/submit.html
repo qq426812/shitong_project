@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <title>提交证书信息</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <style>
+    body { font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; }
+    input, button { padding: 8px; margin: 5px 0; width: 100%; }
+    #qrcode { margin-top: 20px; text-align: center; }
+  </style>
+</head>
+<body>
+  <h2>填写证书信息</h2>
+
+  <input id="unit" placeholder="公司名称">
+  <input id="device" placeholder="设备名称">
+  <input id="serial" placeholder="出厂编号">
+  <input id="asset" placeholder="管理编号">
+  <input id="date" placeholder="校准日期">
+  <input id="number" placeholder="证书编号">
+
+  <button id="submitBtn">提交并生成二维码</button>
+
+  <div id="qrcode"></div>
+
+  <script>
+    const $ = id => document.getElementById(id);
+    const qrcodeDiv = $("qrcode");
+
+    $("submitBtn").onclick = async () => {
+      const data = {
+        certificate_unit: $("unit").value.trim(),
+        instrument_name: $("device").value.trim(),
+        serial_number: $("serial").value.trim(),
+        asset_number: $("asset").value.trim(),
+        calibration_date: $("date").value.trim(),
+        certificate_number: $("number").value.trim()
+      };
+
+      if (Object.values(data).some(v => !v)) {
+        alert("请完整填写所有字段"); return;
+      }
+
+      const response = await fetch("/api/cert-upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+
+      const result = await response.json();
+
+      if (result.success && result.id) {
+        const url = `${location.origin}/list.html?id=${result.id}`;
+        qrcodeDiv.innerHTML = "";
+
+        const canvas = document.createElement("canvas");
+        QRCode.toCanvas(canvas, url, err => {
+          if (!err) {
+            qrcodeDiv.appendChild(canvas);
+            const link = document.createElement("a");
+            link.href = url;
+            link.textContent = url;
+            link.target = "_blank";
+            link.style.display = "block";
+            link.style.marginTop = "10px";
+            qrcodeDiv.appendChild(link);
+          }
+        });
+      } else {
+        alert("提交失败：" + result.error);
+      }
+    };
+  </script>
+</body>
+</html>

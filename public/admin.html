@@ -1,0 +1,93 @@
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>后台管理 - 证书列表</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background: #f0f0f0; }
+    button { padding: 4px 8px; margin: 0 2px; }
+    input[type="text"] { width: 100%; box-sizing: border-box; }
+  </style>
+</head>
+<body>
+  <h2>证书后台管理</h2>
+  <table id="certTable">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>公司</th>
+        <th>设备</th>
+        <th>出厂编号</th>
+        <th>管理编号</th>
+        <th>校准日期</th>
+        <th>证书编号</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    async function fetchCerts() {
+      const res = await fetch('/api/cert-all');
+      const result = await res.json();
+      if (!result.success) {
+        alert('加载失败'); return;
+      }
+      const tbody = document.querySelector("#certTable tbody");
+      tbody.innerHTML = "";
+      result.data.forEach(row => {
+        const tr = document.createElement("tr");
+
+        tr.innerHTML = `
+          <td>${row.id}</td>
+          <td><input type="text" value="${row.certificate_unit || ''}" data-key="certificate_unit"></td>
+          <td><input type="text" value="${row.instrument_name || ''}" data-key="instrument_name"></td>
+          <td><input type="text" value="${row.serial_number || ''}" data-key="serial_number"></td>
+          <td><input type="text" value="${row.asset_number || ''}" data-key="asset_number"></td>
+          <td><input type="text" value="${row.calibration_date || ''}" data-key="calibration_date"></td>
+          <td><input type="text" value="${row.certificate_number || ''}" data-key="certificate_number"></td>
+          <td>
+            <button onclick="updateCert(${row.id}, this)">保存</button>
+            <button onclick="deleteCert(${row.id})">删除</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function updateCert(id, btn) {
+      const inputs = btn.closest("tr").querySelectorAll("input");
+      const data = { id };
+      inputs.forEach(input => {
+        data[input.dataset.key] = input.value.trim();
+      });
+      const res = await fetch('/api/cert-update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const result = await res.json();
+      if (result.success) alert("更新成功");
+      else alert("更新失败: " + result.error);
+    }
+
+    async function deleteCert(id) {
+      if (!confirm("确定要删除这条记录吗？")) return;
+      const res = await fetch('/api/cert-delete?id=' + id, { method: 'DELETE' });
+      const result = await res.json();
+      if (result.success) {
+        alert("删除成功");
+        fetchCerts();
+      } else {
+        alert("删除失败: " + result.error);
+      }
+    }
+
+    fetchCerts();
+  </script>
+</body>
+</html>

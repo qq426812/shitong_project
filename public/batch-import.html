@@ -15,7 +15,7 @@
 </head>
 <body>
   <h2>批量导入证书数据</h2>
-  <input type="file" id="excelFile" accept=".xlsx">
+  <input type="file" id="excelFile" accept=".xlsx" />
   <button onclick="handleImport()">导入证书</button>
   <pre id="log"></pre>
   <div id="records"></div>
@@ -31,24 +31,33 @@
     recordsDiv.innerHTML = "";
     insertedIds = [];
 
-    let jsonData = []; // 提前声明并确保后面作用域能访问
+    let jsonData = [];
 
-    if (!fileInput.files[0]) return alert("请先选择一个 Excel 文件");
+    if (!fileInput.files[0]) {
+      alert("请先选择一个 Excel 文件");
+      return;
+    }
 
     try {
       const file = fileInput.files[0];
       const data = await file.arrayBuffer();
       const workbook = XLSX.read(data, { type: "array" });
       const sheetName = workbook.SheetNames[0];
-      if (!sheetName) return alert("Excel 文件中未找到任何工作表");
+      if (!sheetName) {
+        alert("Excel 文件中未找到任何工作表");
+        return;
+      }
 
       const sheet = workbook.Sheets[sheetName];
       jsonData = XLSX.utils.sheet_to_json(sheet);
-      if (!jsonData.length) return alert("Excel 文件中没有有效数据");
+      if (!jsonData.length) {
+        alert("Excel 文件中没有有效数据");
+        return;
+      }
 
       log.textContent = `读取到 ${jsonData.length} 条记录，正在上传...\n`;
-      console.log("读取数据：", jsonData);
 
+      // 发送上传请求，后端返回最后插入的ID，例如 { success: true, lastId: 35, count: 10 }
       const res = await fetch("/api/cert-batch", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -56,50 +65,29 @@
       });
 
       const result = await res.json();
-      console.log("导入响应：", result);
 
       if (result.success) {
-        log.textContent += `✅ 成功导入 ${result.count} 条记录\n`;
+        log.textContent += `✅ 成功导入 ${result.count || jsonData.length} 条记录\n`;
 
-        insertedIds = result.ids || [];
-        console.log("返回 IDs：", insertedIds);
+        const lastId = result.lastId;
 
-        if (!Array.isArray(insertedIds)) {
+        if (typeof lastId === "number") {
+          const count = jsonData.length;
           insertedIds = [];
-        }
-
-        if (insertedIds.length === 0) {
-          console.warn("返回为空 ID，尝试调用 cert-latest 接口");
-
-          // 👇 这里加入判断：jsonData 是否仍有效
-          if (!jsonData || !Array.isArray(jsonData)) {
-            log.textContent += `❌ jsonData 不存在或格式错误`;
-            return;
+          // 假设数据库ID连续自增，从 lastId - count + 1 到 lastId
+          for (let i = lastId - count + 1; i <= lastId; i++) {
+            insertedIds.push(i);
           }
-
-          const latestRes = await fetch("/api/cert-latest?count=" + jsonData.length);
-          const latest = await latestRes.json();
-          console.log("获取最新 ID 返回：", latest);
-          if (latest.success && Array.isArray(latest.ids)) {
-            insertedIds = latest.ids;
-          } else {
-            log.textContent += `⚠️ cert-latest 接口无效返回`;
-          }
-        }
-
-        if (insertedIds.length > 0) {
           showQrLinks(insertedIds);
         } else {
-          log.textContent += `⚠️ 无法获取证书 ID`;
+          log.textContent += "⚠️ 后端未返回最后插入ID，无法生成二维码\n";
         }
-
       } else {
-        log.textContent += `❌ 导入失败：${result.error}`;
+        log.textContent += `❌ 导入失败：${result.error || "未知错误"}\n`;
       }
-
     } catch (err) {
-      console.error("处理过程中发生错误：", err);
-      log.textContent += `❌ 程序异常：${err.message}`;
+      console.error(err);
+      log.textContent += `❌ 程序异常：${err.message}\n`;
     }
   }
 
@@ -130,7 +118,6 @@
     });
   }
 </script>
-
 
 </body>
 </html>

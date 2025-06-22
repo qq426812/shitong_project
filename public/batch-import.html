@@ -39,7 +39,7 @@
       const sheet = workbook.Sheets[workbook.SheetNames[0]];
       const jsonData = XLSX.utils.sheet_to_json(sheet);
 
-      log.textContent = 读取到 ${jsonData.length} 条记录，正在上传...\n;
+      //log.textContent = 读取到 ${jsonData.length} 条记录，正在上传...\n;
 
       const res = await fetch("/api/cert-batch", {
         method: "POST",

@@ -1,0 +1,4 @@
+[[d1_databases]]
+binding = "DB"
+database_name = "certificates"
+database_id = "YOUR_DATABASE_ID_HERE"

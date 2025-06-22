@@ -1,105 +1,84 @@
-<!DOCTYPE html>
-<html lang="zh">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>批量导入证书</title>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
-  <style>
-    body { font-family: sans-serif; max-width: 900px; margin: auto; padding: 20px; }
-    .record { margin-top: 20px; padding: 10px; border: 1px solid #ccc; border-radius: 6px; }
-    .qrcode { margin-top: 10px; text-align: center; }
-    .qrcode a { display: block; margin-top: 5px; word-break: break-all; font-size: 14px; }
-  </style>
-</head>
-<body>
-  <h2>批量导入证书数据</h2>
-  <input type="file" id="excelFile" accept=".xlsx">
-  <button onclick="handleImport()">导入证书</button>
-  <pre id="log"></pre>
-  <div id="records"></div>
+<script>
+  let insertedIds = [];
 
-  <script>
-    let insertedIds = [];
+  async function handleImport() {
+    const fileInput = document.getElementById("excelFile");
+    const log = document.getElementById("log");
+    const recordsDiv = document.getElementById("records");
+    log.textContent = "";
+    recordsDiv.innerHTML = "";
+    insertedIds = [];
 
-    async function handleImport() {
-      const fileInput = document.getElementById("excelFile");
-      const log = document.getElementById("log");
-      const recordsDiv = document.getElementById("records");
-      log.textContent = "";
-      recordsDiv.innerHTML = "";
-      insertedIds = [];
+    let jsonData = [];  // ✅ 提前声明，保证后面可用
 
-      if (!fileInput.files[0]) return alert("请先选择一个 Excel 文件");
+    if (!fileInput.files[0]) return alert("请先选择一个 Excel 文件");
 
-      try {
-        const file = fileInput.files[0];
-        const data = await file.arrayBuffer();
-        const workbook = XLSX.read(data, { type: "array" });
-        const sheetName = workbook.SheetNames[0];
-        if (!sheetName) return alert("Excel 文件中未找到任何工作表");
+    try {
+      const file = fileInput.files[0];
+      const data = await file.arrayBuffer();
+      const workbook = XLSX.read(data, { type: "array" });
+      const sheetName = workbook.SheetNames[0];
+      if (!sheetName) return alert("Excel 文件中未找到任何工作表");
 
-        const sheet = workbook.Sheets[sheetName];
-        const jsonData = XLSX.utils.sheet_to_json(sheet);
-        if (!jsonData.length) return alert("Excel 文件中没有有效数据");
+      const sheet = workbook.Sheets[sheetName];
+      jsonData = XLSX.utils.sheet_to_json(sheet);
+      if (!jsonData.length) return alert("Excel 文件中没有有效数据");
 
-        log.textContent = `读取到 ${jsonData.length} 条记录，正在上传...\n`;
+      log.textContent = `读取到 ${jsonData.length} 条记录，正在上传...\n`;
 
-        const res = await fetch("/api/cert-batch", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ records: jsonData })
-        });
-
-        const result = await res.json();
-        if (result.success) {
-          log.textContent += `✅ 成功导入 ${result.count} 条记录\n`;
-
-          insertedIds = result.ids || [];
-          if (insertedIds.length === 0) {
-            const latestRes = await fetch("/api/cert-latest?count=" + jsonData.length);
-            const latest = await latestRes.json();
-            if (latest.success) insertedIds = latest.ids;
-          }
-
-          if (insertedIds.length > 0) showQrLinks(insertedIds);
-          else log.textContent += `⚠️ 无法获取证书 ID`;
-        } else {
-          log.textContent += `❌ 导入失败：${result.error}`;
-        }
-      } catch (err) {
-        console.error(err);
-        log.textContent += `❌ 程序异常：${err.message}`;
-      }
-    }
-
-    function showQrLinks(ids) {
-      const recordsDiv = document.getElementById("records");
-      recordsDiv.innerHTML = "";
-      ids.forEach(id => {
-        const url = `${location.origin}/list.html?id=${id}`;
-        const wrapper = document.createElement("div");
-        wrapper.className = "record";
-
-        const qrCanvas = document.createElement("canvas");
-        QRCode.toCanvas(qrCanvas, url);
-
-        const link = document.createElement("a");
-        link.href = url;
-        link.target = "_blank";
-        link.textContent = url;
-
-        const qrDiv = document.createElement("div");
-        qrDiv.className = "qrcode";
-        qrDiv.appendChild(qrCanvas);
-        qrDiv.appendChild(link);
-
-        wrapper.appendChild(document.createTextNode(`证书 ID: ${id}`));
-        wrapper.appendChild(qrDiv);
-        recordsDiv.appendChild(wrapper);
+      const res = await fetch("/api/cert-batch", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ records: jsonData })
       });
+
+      const result = await res.json();
+      if (result.success) {
+        log.textContent += `✅ 成功导入 ${result.count} 条记录\n`;
+
+        insertedIds = result.ids || [];
+
+        if (insertedIds.length === 0) {
+          const latestRes = await fetch("/api/cert-latest?count=" + jsonData.length);
+          const latest = await latestRes.json();
+          if (latest.success) insertedIds = latest.ids;
+        }
+
+        if (insertedIds.length > 0) showQrLinks(insertedIds);
+        else log.textContent += `⚠️ 无法获取证书 ID`;
+      } else {
+        log.textContent += `❌ 导入失败：${result.error}`;
+      }
+    } catch (err) {
+      console.error(err);
+      log.textContent += `❌ 程序异常：${err.message}`;
     }
-  </script>
-</body>
-</html>
+  }
+
+  function showQrLinks(ids) {
+    const recordsDiv = document.getElementById("records");
+    recordsDiv.innerHTML = "";
+    ids.forEach(id => {
+      const url = `${location.origin}/list.html?id=${id}`;
+      const wrapper = document.createElement("div");
+      wrapper.className = "record";
+
+      const qrCanvas = document.createElement("canvas");
+      QRCode.toCanvas(qrCanvas, url);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.target = "_blank";
+      link.textContent = url;
+
+      const qrDiv = document.createElement("div");
+      qrDiv.className = "qrcode";
+      qrDiv.appendChild(qrCanvas);
+      qrDiv.appendChild(link);
+
+      wrapper.appendChild(document.createTextNode(`证书 ID: ${id}`));
+      wrapper.appendChild(qrDiv);
+      recordsDiv.appendChild(wrapper);
+    });
+  }
+</script>

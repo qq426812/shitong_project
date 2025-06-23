@@ -9,7 +9,7 @@ export const onRequestPost = async ({ request, env }) => {
       });
     }
 
-    let successCount = 0;
+    const batchId = crypto.randomUUID(); // ✅ 生成唯一批次 ID
     const insertedIds = [];
 
     for (const rec of records) {
@@ -20,8 +20,9 @@ export const onRequestPost = async ({ request, env }) => {
           device,
           serial,
           management,
-          calibration_date
-        ) VALUES (?, ?, ?, ?, ?, ?)
+          calibration_date,
+          batch_id
+        ) VALUES (?, ?, ?, ?, ?, ?, ?)
       `);
 
       const values = [
@@ -30,18 +31,22 @@ export const onRequestPost = async ({ request, env }) => {
         rec["device"] || rec["设备名称"] || "",
         rec["serial"] || rec["出厂编号"] || "",
         rec["management"] || rec["管理编号"] || "",
-        rec["calibration_date"] || rec["检/校日期"] || ""
+        rec["calibration_date"] || rec["检/校日期"] || "",
+        batchId
       ];
 
-      const result = await stmt.bind(...values).run();
+      await stmt.bind(...values).run();
 
-      if (result && result.lastInsertRowid) {
-        insertedIds.push(result.lastInsertRowid);
-        successCount++;
-      }
+      const row = await env.DB.prepare("SELECT last_insert_rowid() AS id").first();
+      if (row?.id) insertedIds.push(row.id);
     }
 
-    return new Response(JSON.stringify({ success: true, count: successCount, ids: insertedIds }), {
+    return new Response(JSON.stringify({
+      success: true,
+      count: insertedIds.length,
+      ids: insertedIds,
+      batch_id: batchId
+    }), {
       headers: { "Content-Type": "application/json" }
     });
 

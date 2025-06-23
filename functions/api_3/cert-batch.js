@@ -35,9 +35,9 @@ export const onRequestPost = async ({ request, env }) => {
         rec["instrument_name"] || rec["仪器名称"] || "",
         rec["model"] || rec["规格型号"] || "",
         rec["serial_number"] || rec["出厂编号"] || "",
-        rec["asset_number"] || rec["管理编号"] || "",
+        rec["asset_number"] || rec["资产编号"] || "",
         rec["manufacturer"] || rec["制造厂商"] || "",
-        rec["calibration_date"] || rec["校准日期"] || "",
+        rec["calibration_date"] || rec["检/校日期"] || "",
         rec["calibration_personnel"] || rec["校准/检定员"] || ""
       ];
 

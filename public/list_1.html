@@ -129,52 +129,70 @@
         </table>
     </div>
 
-    <script>
+   <script>
   async function fetchAndRenderById(id) {
     try {
       const res = await fetch(`/api_1/cert-get?id=${encodeURIComponent(id)}`);
       const data = await res.json();
-      console.log("读取数据：", data);
-      if (data.success && data.record) {
-        const record = data.record;
-
-        document.getElementById("certificateNumber").textContent = record.certificate_number || '/';
-        document.getElementById("certificateUnit").textContent = record.certificate_unit || '/';
-        document.getElementById("calibrationDate").textContent = record.calibration_date || '/';
-        document.getElementById("deviceName").textContent = record.instrument_name || '/';
-        document.getElementById("factorySerial").textContent = record.serial_number || '/';
-        document.getElementById("managementNumber").textContent = record.asset_number || '/';
-      } else {
-        alert("未找到证书数据");
-      }
-
+      console.log("按 ID 读取数据：", data);
+      renderRecord(data.record);
     } catch (e) {
-      console.error("查询失败", e);
+      console.error("按 ID 查询失败", e);
       alert("查询失败，请稍后再试");
     }
   }
 
+  async function fetchAndRenderByCertificateNumber(certNo) {
+    try {
+      const res = await fetch(`/api_1/cert-detail?certificate_number=${encodeURIComponent(certNo)}`);
+      const data = await res.json();
+      console.log("按证书编号读取数据：", data);
+      renderRecord(data.record);
+    } catch (e) {
+      console.error("按证书编号查询失败", e);
+      alert("查询失败，请稍后再试");
+    }
+  }
+
+  function renderRecord(record) {
+    if (!record) {
+      alert("未找到证书数据");
+      return;
+    }
+
+    document.getElementById("certificateNumber").textContent = record.certificate_number || '/';
+    document.getElementById("certificateUnit").textContent = record.certificate_unit || '/';
+    document.getElementById("calibrationDate").textContent = record.calibration_date || '/';
+    document.getElementById("deviceName").textContent = record.instrument_name || '/';
+    document.getElementById("factorySerial").textContent = record.serial_number || '/';
+    document.getElementById("managementNumber").textContent = record.asset_number || '/';
+  }
+
   window.onload = () => {
     const urlParams = new URLSearchParams(window.location.search);
-    const id = urlParams.get("id");
-    if (id) {
-      fetchAndRenderById(id);
+    const raw = urlParams.get("id") || urlParams.get("certificate_number");
+
+    if (raw) {
+      if (/^\d+$/.test(raw)) {
+        // 是数字 ID，调用 cert-get 接口
+        fetchAndRenderById(raw);
+      } else {
+        // 是证书编号，调用 cert-detail 接口
+        fetchAndRenderByCertificateNumber(raw);
+      }
     }
 
     document.getElementById("queryForm").addEventListener("submit", event => {
       event.preventDefault();
       const inputValue = document.getElementById("certificateInput").value.trim();
       if (inputValue) {
-        // 用证书编号输入时也可以做搜索，你也可以改为 ?certificate_number=xxx
-       // window.location.href = `?id=${encodeURIComponent(inputValue)}`;
+        // 查询方式统一为一个参数（兼容二维码和用户输入）
         window.location.href = `?certificate_number=${encodeURIComponent(inputValue)}`;
-
-
-          
       }
     });
   };
 </script>
+
 
 </body>
 </html>

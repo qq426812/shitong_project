@@ -15,7 +15,7 @@
 </head>
 <body>
   <h2>批量导入证书数据</h2>
-  <input type="file" id="excelFile" accept=".xlsx">
+  <input type="file" id="excelFile" accept=".xlsx" />
   <button onclick="handleImport()">导入证书</button>
   <pre id="log"></pre>
   <div id="records"></div>
@@ -33,23 +33,32 @@
 
     let jsonData = [];
 
-    if (!fileInput.files[0]) return alert("请先选择一个 Excel 文件");
+    if (!fileInput.files[0]) {
+      alert("请先选择一个 Excel 文件");
+      return;
+    }
 
     try {
       const file = fileInput.files[0];
       const data = await file.arrayBuffer();
       const workbook = XLSX.read(data, { type: "array" });
       const sheetName = workbook.SheetNames[0];
-      if (!sheetName) return alert("Excel 文件中未找到任何工作表");
+      if (!sheetName) {
+        alert("Excel 文件中未找到任何工作表");
+        return;
+      }
 
       const sheet = workbook.Sheets[sheetName];
       jsonData = XLSX.utils.sheet_to_json(sheet);
-      if (!jsonData.length) return alert("Excel 文件中没有有效数据");
+      if (!jsonData.length) {
+        alert("Excel 文件中没有有效数据");
+        return;
+      }
 
       log.textContent = `读取到 ${jsonData.length} 条记录，正在上传...\n`;
       console.log("读取数据：", jsonData);
 
-      const res = await fetch("/api_1/cert-batch", {
+      const res = await fetch("/api_3/cert-batch", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ records: jsonData })
@@ -65,11 +74,11 @@
 
         if (!Array.isArray(insertedIds)) insertedIds = [];
 
-        // ✅ 如果后端没有返回 ids，则改为从 cert-latest 推算
+        // 如果后端没有返回 ids，则尝试调用 cert-latest 接口推算
         if (insertedIds.length === 0) {
           console.warn("返回为空 ID，尝试调用 cert-latest 接口");
 
-          const latestRes = await fetch("/api_1/cert-latest");
+          const latestRes = await fetch("/api_3/cert-latest");
           const latest = await latestRes.json();
           console.log("获取最新 ID 返回：", latest);
 
@@ -108,41 +117,38 @@
     }
   }
 
-function showQrLinks(ids, records) {
-  const recordsDiv = document.getElementById("records");
-  recordsDiv.innerHTML = "";
+  function showQrLinks(ids, records) {
+    const recordsDiv = document.getElementById("records");
+    recordsDiv.innerHTML = "";
 
-  ids.forEach(id => {
-    const url = `${location.origin}/list_1.html?id=${id}`;
-    const wrapper = document.createElement("div");
-    wrapper.className = "record";
+    ids.forEach(id => {
+      // 这里修改二维码链接对应展示页面，如果你用的是 list_1.html 或别的页面，请改这里
+      const url = `${location.origin}/list_3.html?id=${id}`;
+      const wrapper = document.createElement("div");
+      wrapper.className = "record";
 
-    const qrCanvas = document.createElement("canvas");
-    QRCode.toCanvas(qrCanvas, url, { margin: 0 });
+      const qrCanvas = document.createElement("canvas");
+      QRCode.toCanvas(qrCanvas, url, { margin: 0 });
 
-    const link = document.createElement("a");
-    link.href = url;
-    link.target = "_blank";
-    link.textContent = url;
+      const link = document.createElement("a");
+      link.href = url;
+      link.target = "_blank";
+      link.textContent = url;
 
-    const qrDiv = document.createElement("div");
-    qrDiv.className = "qrcode";
-    qrDiv.appendChild(qrCanvas);
-    qrDiv.appendChild(link);
+      const qrDiv = document.createElement("div");
+      qrDiv.className = "qrcode";
+      qrDiv.appendChild(qrCanvas);
+      qrDiv.appendChild(link);
 
-    // ✅ 提取对应的证书编号字段
-    const index = ids.indexOf(id);
-    const certNo = records[index]?.["证书编号"] || `ID: ${id}`;
-    wrapper.appendChild(document.createTextNode(`证书编号: ${certNo}`));
+      // 这里提取对应的“证书编号”字段，字段名对应 certificates3 表字段，这里假设 Excel 里列名是“certificate_number”或“证书编号”，你可根据实际调整
+      const index = ids.indexOf(id);
+      const certNo = records[index]?.certificate_number || records[index]?.["证书编号"] || `ID: ${id}`;
+      wrapper.appendChild(document.createTextNode(`证书编号: ${certNo}`));
 
-    wrapper.appendChild(qrDiv);
-    recordsDiv.appendChild(wrapper);
-  });
-}
-
-
-</script>
-
-
+      wrapper.appendChild(qrDiv);
+      recordsDiv.appendChild(wrapper);
+    });
+  }
+  </script>
 </body>
 </html>

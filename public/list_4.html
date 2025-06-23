@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>证书信息查询</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0; padding: 0;
+      background-color: #f8f9fa;
+      color: #333;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      height: 100vh;
+    }
+    .container {
+      width: 90%;
+      max-width: 400px;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      padding: 20px;
+      margin-top: 20px;
+    }
+    .title {
+      color: #000;
+      font-size: 1.6em;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .subtitle {
+      color: rgb(94, 195, 194);
+      font-size: 1.3em;
+      font-weight: bold;
+      margin-bottom: 40px;
+    }
+    .info {
+      line-height: 1.4;
+    }
+    .info div {
+      background-color: rgb(230, 240, 247);
+      padding: 5px 10px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .info span:first-child {
+      font-weight: bold;
+      color: #555;
+      min-width: 120px;
+      text-align: left;
+    }
+    .info span:last-child {
+      flex-grow: 1;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="title">溯源信息</div>
+    <div class="subtitle">Traceability information</div>
+    <div class="info">
+      <div><span>证书单位:</span> <span id="certificate-unit">-</span></div>
+      <div><span>证书编号:</span> <span id="certificate-number">-</span></div>
+      <div><span>证书类型:</span> <span id="certificate-type">-</span></div>
+      <div><span>仪器名称:</span> <span id="instrument-name">-</span></div>
+      <div><span>规格型号:</span> <span id="model">-</span></div>
+      <div><span>出厂编号:</span> <span id="serial-number">-</span></div>
+      <div><span>资产编号:</span> <span id="asset-number">-</span></div>
+      <div><span>制造厂商:</span> <span id="manufacturer">-</span></div>
+      <div><span>检/校日期:</span> <span id="calibration-date">-</span></div>
+      <div><span>校准/检定员:</span> <span id="calibration-personnel">-</span></div>
+    </div>
+  </div>
+
+  <script>
+    async function fetchCertById(id) {
+      try {
+        const res = await fetch(`/api_3/cert-get?id=${encodeURIComponent(id)}`);
+        const data = await res.json();
+        if (!data.success) {
+          alert('未找到对应证书信息：' + (data.error || '未知错误'));
+          return null;
+        }
+        return data.record;
+      } catch (e) {
+        alert('请求错误：' + e.message);
+        return null;
+      }
+    }
+
+    function renderData(data) {
+      if (!data) return;
+      const mapping = {
+        certificate_unit: 'certificate-unit',
+        certificate_number: 'certificate-number',
+        certificate_type: 'certificate-type',
+        instrument_name: 'instrument-name',
+        model: 'model',
+        serial_number: 'serial-number',
+        asset_number: 'asset-number',
+        manufacturer: 'manufacturer',
+        calibration_date: 'calibration-date',
+        calibration_personnel: 'calibration-personnel',
+      };
+      Object.entries(mapping).forEach(([key, id]) => {
+        document.getElementById(id).textContent = data[key] ?? '-';
+      });
+    }
+
+    (async () => {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('id');
+      if (!id) {
+        alert('缺少证书ID参数');
+        return;
+      }
+      const certData = await fetchCertById(id);
+      renderData(certData);
+    })();
+  </script>
+</body>
+</html>

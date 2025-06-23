@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>批量导入证书</title>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <style>
+    body { font-family: sans-serif; max-width: 900px; margin: auto; padding: 20px; }
+    .record { margin-top: 20px; padding: 10px; border: 1px solid #ccc; border-radius: 6px; }
+    .qrcode { margin-top: 10px; text-align: center; }
+    .qrcode a { display: block; margin-top: 5px; word-break: break-all; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <h2>批量导入证书数据</h2>
+  <input type="file" id="excelFile" accept=".xlsx" />
+  <button onclick="handleImport()">导入证书</button>
+  <pre id="log"></pre>
+  <div id="records"></div>
+
+  <script>
+  let insertedIds = [];
+
+  async function handleImport() {
+    const fileInput = document.getElementById("excelFile");
+    const log = document.getElementById("log");
+    const recordsDiv = document.getElementById("records");
+    log.textContent = "";
+    recordsDiv.innerHTML = "";
+    insertedIds = [];
+
+    let jsonData = [];
+
+    if (!fileInput.files[0]) {
+      alert("请先选择一个 Excel 文件");
+      return;
+    }
+
+    try {
+      const file = fileInput.files[0];
+      const data = await file.arrayBuffer();
+      const workbook = XLSX.read(data, { type: "array" });
+      const sheetName = workbook.SheetNames[0];
+      if (!sheetName) {
+        alert("Excel 文件中未找到任何工作表");
+        return;
+      }
+
+      const sheet = workbook.Sheets[sheetName];
+      const rawData = XLSX.utils.sheet_to_json(sheet);
+      const fieldMap = {
+        "证书编号": "certificate_number",
+        "证书单位": "certificate_unit",
+        "证书类型": "certificate_type",
+        "仪器名称": "instrument_name",
+        "规格型号": "model",
+        "出厂编号": "serial_number",
+        "管理编号": "asset_number",
+        "制造厂商": "manufacturer",
+        "校准日期": "calibration_date",
+        "检/校日期": "calibration_date",
+        "校准/检定员": "calibration_personnel"
+      };
+
+      // Excel日期序列转 YYYY-MM-DD
+      function excelDateToString(serial) {
+        if (!serial || isNaN(serial)) return "";
+        const utcDays = Math.floor(serial - 25569);
+        const date = new Date(utcDays * 86400 * 1000);
+        return date.toISOString().split("T")[0];
+      }
+      
+      jsonData = rawData.map(record => {
+        const normalized = {};
+        for (const key in record) {
+          const mappedKey = fieldMap[key] || key;
+          if (mappedKey === "calibration_date") {
+            normalized[mappedKey] = excelDateToString(record[key]);
+          } else {
+            normalized[mappedKey] = record[key];
+          }
+        }
+        return normalized;
+      });
+
+      if (!jsonData.length) {
+        alert("Excel 文件中没有有效数据");
+        return;
+      }
+
+      log.textContent = `读取到 ${jsonData.length} 条记录，正在上传...\n`;
+      console.log("读取数据：", jsonData);
+
+      const res = await fetch("/api_3/cert-batch", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ records: jsonData })
+      });
+
+      const result = await res.json();
+      console.log("导入响应：", result);
+
+      if (result.success) {
+        log.textContent += `✅ 成功导入 ${result.count || jsonData.length} 条记录\n`;
+
+        insertedIds = result.ids || [];
+
+        if (!Array.isArray(insertedIds)) insertedIds = [];
+
+        // 如果后端没有返回 ids，则尝试调用 cert-latest 接口推算
+        if (insertedIds.length === 0) {
+          console.warn("返回为空 ID，尝试调用 cert-latest 接口");
+
+          const latestRes = await fetch("/api_3/cert-latest");
+          const latest = await latestRes.json();
+          console.log("获取最新 ID 返回：", latest);
+
+          if (latest.success && typeof latest.id === "number") {
+            const maxId = latest.id;
+            const count = jsonData.length;
+            const startId = maxId - count + 1;
+
+            if (startId <= 0) {
+              log.textContent += `❗ 计算起始 ID 异常（startId=${startId}）\n`;
+              return;
+            }
+
+            insertedIds = [];
+            for (let i = startId; i <= maxId; i++) {
+              insertedIds.push(i);
+            }
+          } else {
+            log.textContent += `⚠️ cert-latest 接口无效返回，无法获取最大 ID\n`;
+          }
+        }
+
+        if (insertedIds.length > 0) {
+          showQrLinks(insertedIds, jsonData);
+        } else {
+          log.textContent += `⚠️ 无法获取证书 ID\n`;
+        }
+
+      } else {
+        log.textContent += `❌ 导入失败：${result.error || "未知错误"}\n`;
+      }
+
+    } catch (err) {
+      console.error("处理过程中发生错误：", err);
+      log.textContent += `❌ 程序异常：${err.message}\n`;
+    }
+  }
+
+  function showQrLinks(ids, records) {
+    const recordsDiv = document.getElementById("records");
+    recordsDiv.innerHTML = "";
+
+    ids.forEach(id => {
+      // 这里修改二维码链接对应展示页面，如果你用的是 list_1.html 或别的页面，请改这里
+      const url = `${location.origin}/list_3.html?id=${id}`;
+      const wrapper = document.createElement("div");
+      wrapper.className = "record";
+
+      const qrCanvas = document.createElement("canvas");
+      QRCode.toCanvas(qrCanvas, url, { margin: 0 });
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.target = "_blank";
+      link.textContent = url;
+
+      const qrDiv = document.createElement("div");
+      qrDiv.className = "qrcode";
+      qrDiv.appendChild(qrCanvas);
+      qrDiv.appendChild(link);
+
+      // 这里提取对应的“证书编号”字段，字段名对应 certificates3 表字段，这里假设 Excel 里列名是“certificate_number”或“证书编号”，你可根据实际调整
+      const index = ids.indexOf(id);
+      const certNo = records[index]?.certificate_number || records[index]?.["证书编号"] || `ID: ${id}`;
+      wrapper.appendChild(document.createTextNode(`证书编号: ${certNo}`));
+
+      wrapper.appendChild(qrDiv);
+      recordsDiv.appendChild(wrapper);
+    });
+  }
+  </script>
+</body>
+</html>

@@ -20,6 +20,7 @@ CREATE TABLE cert_lookup (
 );
 
 CREATE TABLE certificates3 (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
   certificate_number TEXT,
   certificate_unit TEXT,
   certificate_type TEXT,

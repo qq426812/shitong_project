@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="zh">
 <head>
   <meta charset="UTF-8" />
@@ -67,7 +66,7 @@
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td><input type="checkbox" class="rowCheckbox" data-id="${row.id}" /></td>
-          <td><input type="text" value="${row.id}" data-key="id" /></td>
+          <td>${row.id}</td>
           <td><input type="text" value="${row.certificate_unit || ''}" data-key="certificate_unit" /></td>
           <td><input type="text" value="${row.instrument_name || ''}" data-key="instrument_name" /></td>
           <td><input type="text" value="${row.serial_number || ''}" data-key="serial_number" /></td>
@@ -125,34 +124,20 @@
       paginationDiv.appendChild(nextBtn);
     }
 
-    async function updateCert(originalId, btn) {
+    async function updateCert(id, btn) {
       const inputs = btn.closest("tr").querySelectorAll("input[type='text']");
-      const data = {};
-
+      const data = { id };
       inputs.forEach(input => {
-        const key = input.dataset.key;
-        const value = input.value.trim();
-        if (key === "id") {
-          data.new_id = value; // 新的 ID
-        } else {
-          data[key] = value;
-        }
+        data[input.dataset.key] = input.value.trim();
       });
-
-      data.id = originalId; // 原始 ID
-
       const res = await fetch('/api/cert-update', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       });
       const result = await res.json();
-      if (result.success) {
-        alert("更新成功");
-        fetchCerts();
-      } else {
-        alert("更新失败: " + result.error);
-      }
+      if (result.success) alert("更新成功");
+      else alert("更新失败: " + result.error);
     }
 
     async function deleteCert(id) {

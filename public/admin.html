@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="zh">
 <head>
   <meta charset="UTF-8" />
@@ -124,20 +125,34 @@
       paginationDiv.appendChild(nextBtn);
     }
 
-    async function updateCert(id, btn) {
+    async function updateCert(originalId, btn) {
       const inputs = btn.closest("tr").querySelectorAll("input[type='text']");
-      const data = { id };
+      const data = {};
+
       inputs.forEach(input => {
-        data[input.dataset.key] = input.value.trim();
+        const key = input.dataset.key;
+        const value = input.value.trim();
+        if (key === "id") {
+          data.new_id = value; // 新的 ID
+        } else {
+          data[key] = value;
+        }
       });
+
+      data.id = originalId; // 原始 ID
+
       const res = await fetch('/api/cert-update', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       });
       const result = await res.json();
-      if (result.success) alert("更新成功");
-      else alert("更新失败: " + result.error);
+      if (result.success) {
+        alert("更新成功");
+        fetchCerts();
+      } else {
+        alert("更新失败: " + result.error);
+      }
     }
 
     async function deleteCert(id) {

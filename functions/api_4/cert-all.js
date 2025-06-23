@@ -3,17 +3,13 @@ export async function onRequestGet({ env }) {
     const stmt = env.DB.prepare(`
       SELECT 
         id,
-        certificate_number,
-        certificate_unit,
-        certificate_type,
-        instrument_name,
-        model,
-        serial_number,
-        asset_number,
-        manufacturer,
+        company,
+        device,
+        serial,
+        management,
         calibration_date,
-        calibration_personnel
-      FROM certificates3
+        certificate_number
+      FROM certificates_simple
       ORDER BY id DESC
     `);
 

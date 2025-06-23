@@ -13,23 +13,23 @@ export const onRequestPost = async ({ request, env }) => {
 
     for (const rec of records) {
       const stmt = env.DB.prepare(`
-        INSERT INTO certificates (
+        INSERT INTO cert_lookup (
+          certificate_number,
           certificate_unit,
+          calibration_date,
           instrument_name,
           serial_number,
-          asset_number,
-          calibration_date,
-          certificate_number
+          asset_number
         ) VALUES (?, ?, ?, ?, ?, ?)
       `);
 
       const values = [
-        rec["公司名称"] || "",
-        rec["设备名称"] || "",
-        rec["出厂编号"] || "",
-        rec["管理编号"] || "",
+        rec["证书编号"] || "",
+        rec["证书单位"] || "",
         rec["校准日期"] || "",
-        rec["证书编号"] || ""
+        rec["仪器名称"] || "",
+        rec["出厂编号"] || "",
+        rec["管理编号"] || ""
       ];
 
       await stmt.bind(...values).run();

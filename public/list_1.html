@@ -134,7 +134,7 @@
     try {
       const res = await fetch(`/api_1/cert-latest?id=${encodeURIComponent(id)}`);
       const data = await res.json();
-
+      console.log("读取数据：", data);
       if (data.success && data.record) {
         const record = data.record;
 

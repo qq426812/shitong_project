@@ -132,7 +132,7 @@
     <script>
   async function fetchAndRenderById(id) {
     try {
-      const res = await fetch(`/api_1/cert-detail?id=${encodeURIComponent(id)}`);
+      const res = await fetch(`/api_1/cert-lates?id=${encodeURIComponent(id)}`);
       const data = await res.json();
 
       if (data.success && data.record) {

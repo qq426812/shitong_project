@@ -4,11 +4,15 @@ export async function onRequestGet({ env }) {
       id,
       certificate_number,
       certificate_unit,
-      calibration_date,
+      certificate_type,
       instrument_name,
+      model,
       serial_number,
-      asset_number
-    FROM cert_lookup
+      asset_number,
+      manufacturer,
+      calibration_date,
+      calibration_personnel
+    FROM certificates3
     ORDER BY id DESC
   `);
 

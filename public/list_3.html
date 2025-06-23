@@ -1,77 +1,119 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>证书信息查询</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      margin: 0; padding: 0;
-      background-color: #f8f9fa;
+      margin: 0;
+      padding: 0;
+      background-color: #edf3f9;
+      font-family: "Microsoft YaHei", Arial, sans-serif;
       color: #333;
       display: flex;
       justify-content: center;
       align-items: flex-start;
-      height: 100vh;
+      min-height: 100vh;
     }
+
     .container {
       width: 90%;
       max-width: 400px;
-      background-color: #fff;
-      border-radius: 10px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      background-color: #ffffff;
       padding: 20px;
-      margin-top: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.08);
+      margin-top: 30px;
     }
-    .title {
-      color: #000;
-      font-size: 1.6em;
-      font-weight: bold;
+
+    .header-top {
+      font-size: 12px;
+      color: #515A6E;
       margin-bottom: 5px;
+      text-align: right;
     }
-    .subtitle {
-      color: rgb(94, 195, 194);
-      font-size: 1.3em;
+
+    .title {
+      font-size: 26px;
       font-weight: bold;
-      margin-bottom: 40px;
+      color: #515A6E;
+      text-align: left;
+      margin: 10px 0 0;
     }
+
+    .subtitle {
+      font-size: 13px;
+      color: #59b8c6;
+      text-align: left;
+      margin-bottom: 10px;
+    }
+
     .info {
-      line-height: 1.4;
+      background-color: #dcecf7;
+      border-radius: 6px;
+      padding: 10px 15px;
+      font-size: 14px;
+      text-align: left;
     }
+
     .info div {
-      background-color: rgb(230, 240, 247);
-      padding: 5px 10px;
       display: flex;
       justify-content: space-between;
+      border-bottom: 1px solid #c2d7e6;
+      padding: 6px 0;
     }
+
+    .info div:last-child {
+      border-bottom: none;
+    }
+
     .info span:first-child {
       font-weight: bold;
-      color: #555;
-      min-width: 120px;
+      min-width: 90px;
+      color: #333;
       text-align: left;
     }
+
     .info span:last-child {
-      flex-grow: 1;
-      text-align: left;
+      flex: 1;
+      text-align: right;
+      color: #333;
+    }
+
+    .footer {
+      margin-top: 20px;
+      font-size: 12px;
+      background-color: #43485b;
+      color: #aaa;
+      padding: 12px;
+      border-radius: 6px;
+      line-height: 1.6;
+      text-align: center;
     }
   </style>
 </head>
 <body>
   <div class="container">
+    <div class="header-top">服务热线：400-900-8999</div>
     <div class="title">溯源信息</div>
     <div class="subtitle">Traceability information</div>
     <div class="info">
-      <div><span>证书单位:</span> <span id="certificate-unit">-</span></div>
-      <div><span>证书编号:</span> <span id="certificate-number">-</span></div>
-      <div><span>证书类型:</span> <span id="certificate-type">-</span></div>
-      <div><span>仪器名称:</span> <span id="instrument-name">-</span></div>
-      <div><span>规格型号:</span> <span id="model">-</span></div>
-      <div><span>出厂编号:</span> <span id="serial-number">-</span></div>
-      <div><span>资产编号:</span> <span id="asset-number">-</span></div>
-      <div><span>制造厂商:</span> <span id="manufacturer">-</span></div>
-      <div><span>检/校日期:</span> <span id="calibration-date">-</span></div>
-      <div><span>校准/检定员:</span> <span id="calibration-personnel">-</span></div>
+      <div><span>证书单位：</span> <span id="certificate-unit">-</span></div>
+      <div><span>证书编号：</span> <span id="certificate-number">-</span></div>
+      <div><span>证书类型：</span> <span id="certificate-type">-</span></div>
+      <div><span>仪器名称：</span> <span id="instrument-name">-</span></div>
+      <div><span>规格型号：</span> <span id="model">-</span></div>
+      <div><span>出厂编号：</span> <span id="serial-number">-</span></div>
+      <div><span>资产编号：</span> <span id="asset-number">-</span></div>
+      <div><span>制造厂商：</span> <span id="manufacturer">-</span></div>
+      <div><span>检/校日期：</span> <span id="calibration-date">-</span></div>
+      <div><span>校准/检定员：</span> <span id="calibration-personnel">-</span></div>
+    </div>
+
+    <div class="footer">
+      © 深圳市计量质量检测研究院 版权所有<br>
+      粤ICP备11022419号-3
     </div>
   </div>
 

@@ -18,7 +18,7 @@ export async function onRequestPost({ request, env }) {
     }
 
     const stmt = env.DB.prepare(`
-      UPDATE certificates SET
+      UPDATE cert_lookup SET
         certificate_unit = ?,
         instrument_name = ?,
         serial_number = ?,

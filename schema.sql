@@ -8,3 +8,13 @@ CREATE TABLE certificates (
   certificate_number TEXT,
   created_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE cert_lookup (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  certificate_number TEXT, 
+  certificate_unit TEXT,
+  calibration_date TEXT,
+  instrument_name TEXT,
+  serial_number TEXT,
+  asset_number TEXT
+);

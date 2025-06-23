@@ -21,16 +21,12 @@ export const onRequestGet = async ({ request, env }) => {
       SELECT
         id,
         certificate_number,
-        certificate_unit,
-        certificate_type,
-        instrument_name,
-        model,
-        serial_number,
-        asset_number,
-        manufacturer,
-        calibration_date,
-        calibration_personnel
-      FROM certificates3
+        company,
+        device,
+        serial,
+        management,
+        calibration_date
+      FROM certificates_simple
       WHERE id = ?
     `).bind(id).first();
 
@@ -43,7 +39,7 @@ export const onRequestGet = async ({ request, env }) => {
 
     return new Response(JSON.stringify({
       success: true,
-      record: row
+      data: row
     }), {
       headers: { "Content-Type": "application/json" }
     });

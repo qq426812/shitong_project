@@ -3,110 +3,173 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>证书信息查询</title>
+    <title>证书查询</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 0;
-            padding: 0;
-            background-color: #f8f9fa;
-            color: #333;
+            padding: 20px;
+            background-color: #f4f4f4;
+            font-size: 1em;
+            color: #616161;
         }
         .container {
-            width: 90%;
             max-width: 400px;
-            margin: 40px auto;
+            margin: 0 auto;
+            background-color: white;
             padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
             text-align: center;
-            background-color: #fff;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .logo {
-            max-width: 90px;
-            height: auto;
+            color: #616161;
+            font-size: 1.2em;
             margin-bottom: 20px;
         }
-        .title {
-            font-size: 1.4em;
-            font-weight: bold;
-            color: #000;
-            margin-bottom: 20px;
-        }
-        .info {
-            line-height: 1.6;
+
+        form {
             display: flex;
             flex-direction: column;
-            align-items: center;
+            gap: 20px;
+        }
+
+        .divider-container {
+            position: relative;
             width: 100%;
-            padding: 10px 0;
-        }
-        .info-item {
-            padding: 5px 0;
-            margin-bottom: 8px;
+            margin: 0 auto;
             text-align: center;
-            display: flex;
-            max-width: 350px;
-            justify-content: space-between;
+            padding: 20px;
         }
-        .info-item span:first-child {
-            font-weight: bold;
-            color: #555;
-            min-width: 120px;
-            text-align: left;
-            flex-shrink: 0;
+
+        .divider-container::before,
+        .divider-container::after {
+            content: '';
+            display: block;
+            width: 110%;
+            height: 1px;
+            background-color: #ccc;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
         }
-        .info-item span.value {
-            text-align: left;
-            flex-grow: 1;
-            padding-left: 0;
+
+        .divider-container::before { top: 0; }
+        .divider-container::after { bottom: 0; }
+
+        input[type="text"],
+        button {
+            width: calc(100% - 40px);
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            box-sizing: border-box;
+            display: block;
+            margin: 0 auto;
+        }
+
+        input[type="text"] {
+            border: 1px solid #ccc;
+            z-index: 1;
+        }
+
+        button {
+            background-color: rgb(51, 136, 203);
+            color: white;
+            cursor: pointer;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            table-layout: fixed;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            word-wrap: break-word;
+        }
+
+        th {
+            width: 30%;
+            background-color: rgb(159, 212, 244);
+            color: #4f4f4f;
+        }
+
+        td a {
+            color: blue;
+            text-decoration: none;
+        }
+
+        td a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <a href="https://smms.app/image/rAJF3Qu7GosCtk5" target="_blank">
-            <img src="https://s2.loli.net/2025/01/01/rAJF3Qu7GosCtk5.jpg" alt="logo.jpg" class="logo">
-        </a>
-        <div class="title">世通仪器检测服务有限公司</div>
-        <div class="info">
-            <div class="info-item"><span>公司名称:</span><span class="value" id="certificate-unit">/</span></div>
-            <div class="info-item"><span>设备名称:</span><span class="value" id="instrument-name">/</span></div>
-            <div class="info-item"><span>出厂编号:</span><span class="value" id="serial-number">/</span></div>
-            <div class="info-item"><span>管理编号:</span><span class="value" id="asset-number">/</span></div>
-            <div class="info-item"><span>校准日期:</span><span class="value" id="calibration-date">/</span></div>
-            <div class="info-item"><span>证书编号:</span><span class="value" id="certificate-number">/</span></div>
-        </div>
+        <h1>请输入计量证书编号或证书条码</h1>
+        <form id="queryForm">
+            <div class="divider-container">
+                <input type="text" id="certificateInput" placeholder="请输入证书编号或条码">
+            </div>
+            <button type="submit">查询</button>
+        </form>
+        <table>
+            <tr><th>证书编号</th><td><a href="#" id="certificateNumber"></a></td></tr>
+            <tr><th>证书单位</th><td><a href="#" id="certificateUnit"></a></td></tr>
+            <tr><th>校准日期</th><td><a href="#" id="calibrationDate"></a></td></tr>
+            <tr><th>仪器名称</th><td><a href="#" id="deviceName"></a></td></tr>
+            <tr><th>出厂编号</th><td><a href="#" id="factorySerial"></a></td></tr>
+            <tr><th>管理编号</th><td><a href="#" id="managementNumber"></a></td></tr>
+        </table>
     </div>
 
-  <script>
-async function renderDataFromApi() {
-  const params = new URLSearchParams(location.search);
-  const id = params.get("id");
+    <script>
+  async function fetchAndRenderById(id) {
+    try {
+      const res = await fetch(`/api_1/cert-detail?id=${encodeURIComponent(id)}`);
+      const data = await res.json();
 
-  if (!id) {
-    alert("链接中缺少 id 参数"); return;
+      if (data.success && data.record) {
+        const record = data.record;
+
+        document.getElementById("certificateNumber").textContent = record.certificate_number || '/';
+        document.getElementById("certificateUnit").textContent = record.certificate_unit || '/';
+        document.getElementById("calibrationDate").textContent = record.calibration_date || '/';
+        document.getElementById("deviceName").textContent = record.instrument_name || '/';
+        document.getElementById("factorySerial").textContent = record.serial_number || '/';
+        document.getElementById("managementNumber").textContent = record.asset_number || '/';
+      } else {
+        alert("未找到证书数据");
+      }
+
+    } catch (e) {
+      console.error("查询失败", e);
+      alert("查询失败，请稍后再试");
+    }
   }
 
-  const res = await fetch(`/api/cert-get?id=${id}`);
-  const result = await res.json();
+  window.onload = () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const id = urlParams.get("id");
+    if (id) {
+      fetchAndRenderById(id);
+    }
 
-  if (!result.success) {
-    alert("获取数据失败：" + result.error);
-    return;
-  }
-
-  const data = result.data;
-
-  document.getElementById("certificate-unit").textContent = data.certificate_unit || '/';
-  document.getElementById("instrument-name").textContent = data.instrument_name || '/';
-  document.getElementById("serial-number").textContent = data.serial_number || '/';
-  document.getElementById("asset-number").textContent = data.asset_number || '/';
-  document.getElementById("calibration-date").textContent = data.calibration_date || '/';
-  document.getElementById("certificate-number").textContent = data.certificate_number || '/';
-}
-
-renderDataFromApi();
+    document.getElementById("queryForm").addEventListener("submit", event => {
+      event.preventDefault();
+      const inputValue = document.getElementById("certificateInput").value.trim();
+      if (inputValue) {
+        // 用证书编号输入时也可以做搜索，你也可以改为 ?certificate_number=xxx
+        window.location.href = `?id=${encodeURIComponent(inputValue)}`;
+      }
+    });
+  };
 </script>
 
 </body>

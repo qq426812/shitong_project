@@ -18,7 +18,7 @@ export const onRequestGet = async ({ request, env }) => {
 
   try {
     const row = await env.DB.prepare(`
-      SELECT * FROM certificates WHERE id = ?
+      SELECT * FROM cert_lookup WHERE id = ?
     `).bind(id).first();
 
     if (!row) {
@@ -29,23 +29,23 @@ export const onRequestGet = async ({ request, env }) => {
     }
 
     const {
+      certificate_number,
       certificate_unit,
+      calibration_date,
       instrument_name,
       serial_number,
-      asset_number,
-      calibration_date,
-      certificate_number
+      asset_number
     } = row;
 
     return new Response(JSON.stringify({
       success: true,
       data: {
+        certificate_number,
         certificate_unit,
+        calibration_date,
         instrument_name,
         serial_number,
-        asset_number,
-        calibration_date,
-        certificate_number
+        asset_number
       }
     }), {
       headers: { "Content-Type": "application/json" }

@@ -2,16 +2,12 @@ export async function onRequestPost({ request, env }) {
   try {
     const {
       id,
-      certificate_number,       // 证书编号
-      certificate_unit,         // 证书单位
-      certificate_type,         // 证书类型
-      instrument_name,          // 仪器名称
-      model,                    // 规格型号
-      serial_number,            // 出厂编号
-      asset_number,             // 管理编号
-      manufacturer,             // 制造厂商
-      calibration_date,         // 校准日期
-      calibration_personnel     // 校准/检定员
+      company,
+      device,
+      serial,
+      management,
+      calibration_date,
+      certificate_number
     } = await request.json();
 
     if (!id) {
@@ -22,32 +18,24 @@ export async function onRequestPost({ request, env }) {
     }
 
     const stmt = env.DB.prepare(`
-      UPDATE certificates3 SET
-        certificate_number = ?,
-        certificate_unit = ?,
-        certificate_type = ?,
-        instrument_name = ?,
-        model = ?,
-        serial_number = ?,
-        asset_number = ?,
-        manufacturer = ?,
+      UPDATE certificates_simple SET
+        company = ?,
+        device = ?,
+        serial = ?,
+        management = ?,
         calibration_date = ?,
-        calibration_personnel = ?
+        certificate_number = ?
       WHERE id = ?
     `);
 
     await stmt
       .bind(
-        certificate_number,
-        certificate_unit,
-        certificate_type,
-        instrument_name,
-        model,
-        serial_number,
-        asset_number,
-        manufacturer,
+        company,
+        device,
+        serial,
+        management,
         calibration_date,
-        calibration_personnel,
+        certificate_number,
         id
       )
       .run();

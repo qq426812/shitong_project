@@ -18,3 +18,16 @@ CREATE TABLE cert_lookup (
   serial_number TEXT,
   asset_number TEXT
 );
+
+CREATE TABLE certificates3 (
+  certificate_number TEXT,
+  certificate_unit TEXT,
+  certificate_type TEXT,
+  instrument_name TEXT,
+  model TEXT,
+  serial_number TEXT,
+  asset_number TEXT,
+  manufacturer TEXT,
+  calibration_date TEXT,
+  calibration_personnel TEXT
+);

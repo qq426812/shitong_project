@@ -12,15 +12,20 @@ export const onRequestGet = async ({ request, env }) => {
   try {
     const stmt = env.DB.prepare(`
       SELECT
+        id,
         certificate_number,
         certificate_unit,
-        calibration_date,
+        certificate_type,
         instrument_name,
+        model,
         serial_number,
-        asset_number
-      FROM cert_lookup
+        asset_number,
+        manufacturer,
+        calibration_date,
+        calibration_personnel
+      FROM certificates3
       WHERE certificate_number = ?
-      ORDER BY id ASC
+      ORDER BY id DESC
       LIMIT 1
     `);
 

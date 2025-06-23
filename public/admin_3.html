@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh"> 
+<html lang="zh">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -26,10 +26,14 @@
         <th>ID</th>
         <th>证书编号</th>
         <th>证书单位</th>
-        <th>校准日期</th>
+        <th>证书类型</th>
         <th>仪器名称</th>
+        <th>规格型号</th>
         <th>出厂编号</th>
         <th>管理编号</th>
+        <th>制造厂商</th>
+        <th>校准日期</th>
+        <th>校准/检定员</th>
         <th>操作</th>
       </tr>
     </thead>
@@ -44,7 +48,7 @@
     const pageSize = 30;
 
     async function fetchCerts() {
-      const res = await fetch('/api_1/cert-all');
+      const res = await fetch('/api_3/cert-all');
       const result = await res.json();
       if (!result.success) {
         alert('加载失败');
@@ -70,10 +74,14 @@
           <td>${row.id}</td>
           <td><input type="text" value="${row.certificate_number || ''}" data-key="certificate_number" /></td>
           <td><input type="text" value="${row.certificate_unit || ''}" data-key="certificate_unit" /></td>
-          <td><input type="text" value="${row.calibration_date || ''}" data-key="calibration_date" /></td>
+          <td><input type="text" value="${row.certificate_type || ''}" data-key="certificate_type" /></td>
           <td><input type="text" value="${row.instrument_name || ''}" data-key="instrument_name" /></td>
+          <td><input type="text" value="${row.model || ''}" data-key="model" /></td>
           <td><input type="text" value="${row.serial_number || ''}" data-key="serial_number" /></td>
           <td><input type="text" value="${row.asset_number || ''}" data-key="asset_number" /></td>
+          <td><input type="text" value="${row.manufacturer || ''}" data-key="manufacturer" /></td>
+          <td><input type="text" value="${row.calibration_date || ''}" data-key="calibration_date" /></td>
+          <td><input type="text" value="${row.calibration_personnel || ''}" data-key="calibration_personnel" /></td>
           <td>
             <button onclick="updateCert(${row.id}, this)">保存</button>
             <button onclick="deleteCert(${row.id})">删除</button>
@@ -131,7 +139,7 @@
       inputs.forEach(input => {
         data[input.dataset.key] = input.value.trim();
       });
-      const res = await fetch('/api_1/cert-update', {
+      const res = await fetch('/api_3/cert-update', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -143,7 +151,7 @@
 
     async function deleteCert(id) {
       if (!confirm("确定要删除这条记录吗？")) return;
-      const res = await fetch('/api_1/cert-delete?id=' + id, { method: 'DELETE' });
+      const res = await fetch('/api_3/cert-delete?id=' + id, { method: 'DELETE' });
       const result = await res.json();
       if (result.success) {
         alert("删除成功");
@@ -169,7 +177,7 @@
 
       for (const checkbox of selected) {
         const id = checkbox.dataset.id;
-        await fetch('/api_1/cert-delete?id=' + id, { method: 'DELETE' });
+        await fetch('/api_3/cert-delete?id=' + id, { method: 'DELETE' });
       }
 
       alert("批量删除完成");

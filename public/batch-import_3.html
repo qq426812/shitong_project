@@ -49,7 +49,42 @@
       }
 
       const sheet = workbook.Sheets[sheetName];
-      jsonData = XLSX.utils.sheet_to_json(sheet);
+      const rawData = XLSX.utils.sheet_to_json(sheet);
+      const fieldMap = {
+        "证书编号": "certificate_number",
+        "证书单位": "certificate_unit",
+        "证书类型": "certificate_type",
+        "仪器名称": "instrument_name",
+        "规格型号": "model",
+        "出厂编号": "serial_number",
+        "管理编号": "asset_number",
+        "制造厂商": "manufacturer",
+        "校准日期": "calibration_date",
+        "检/校日期": "calibration_date",
+        "校准/检定员": "calibration_personnel"
+      };
+
+      // Excel日期序列转 YYYY-MM-DD
+      function excelDateToString(serial) {
+        if (!serial || isNaN(serial)) return "";
+        const utcDays = Math.floor(serial - 25569);
+        const date = new Date(utcDays * 86400 * 1000);
+        return date.toISOString().split("T")[0];
+      }
+      
+      jsonData = rawData.map(record => {
+        const normalized = {};
+        for (const key in record) {
+          const mappedKey = fieldMap[key] || key;
+          if (mappedKey === "calibration_date") {
+            normalized[mappedKey] = excelDateToString(record[key]);
+          } else {
+            normalized[mappedKey] = record[key];
+          }
+        }
+        return normalized;
+      });
+
       if (!jsonData.length) {
         alert("Excel 文件中没有有效数据");
         return;

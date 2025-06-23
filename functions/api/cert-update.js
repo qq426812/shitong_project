@@ -1,8 +1,8 @@
 export async function onRequestPost({ request, env }) {
   try {
     const {
-      id,            // 原始 ID
-      new_id,        // 要修改成的新 ID（前端传过来的）
+      id,
+      new_id, // 可选字段，用于修改 ID
       certificate_unit,
       instrument_name,
       serial_number,
@@ -11,59 +11,74 @@ export async function onRequestPost({ request, env }) {
       certificate_number
     } = await request.json();
 
-    if (!id || !new_id) {
-      return new Response(JSON.stringify({ success: false, error: "缺少 ID 或 new_id" }), {
+    if (!id) {
+      return new Response(JSON.stringify({ success: false, error: "缺少 ID" }), {
         status: 400,
         headers: { "Content-Type": "application/json" },
       });
     }
 
-    // 开启事务（可选：保持安全）
-    await env.DB.exec("BEGIN");
+    if (new_id && new_id !== id) {
+      // 先检查 new_id 是否已存在，避免主键冲突
+      const exists = await env.DB.prepare(`SELECT id FROM certificates WHERE id = ?`)
+        .bind(new_id)
+        .first();
 
-    // 先更新 ID
-    if (id !== new_id) {
-      const check = await env.DB.prepare("SELECT id FROM certificates WHERE id = ?").bind(new_id).first();
-      if (check) {
-        return new Response(JSON.stringify({ success: false, error: "目标 ID 已存在，无法修改" }), {
+      if (exists) {
+        return new Response(JSON.stringify({ success: false, error: "新的 ID 已存在，不能重复" }), {
           status: 400,
-          headers: { "Content-Type": "application/json" }
+          headers: { "Content-Type": "application/json" },
         });
       }
 
-      await env.DB.prepare("UPDATE certificates SET id = ? WHERE id = ?").bind(new_id, id).run();
+      // 执行 ID 变更 + 字段更新：使用 batch 执行两个语句
+      await env.DB.batch([
+        env.DB.prepare(`DELETE FROM certificates WHERE id = ?`).bind(id),
+        env.DB.prepare(`INSERT INTO certificates (
+          id, certificate_unit, instrument_name, serial_number,
+          asset_number, calibration_date, certificate_number
+        ) VALUES (?, ?, ?, ?, ?, ?, ?)`).bind(
+          new_id,
+          certificate_unit,
+          instrument_name,
+          serial_number,
+          asset_number,
+          calibration_date,
+          certificate_number
+        )
+      ]);
+
+    } else {
+      // 普通字段更新，不涉及 ID
+      const stmt = env.DB.prepare(`
+        UPDATE certificates SET
+          certificate_unit = ?,
+          instrument_name = ?,
+          serial_number = ?,
+          asset_number = ?,
+          calibration_date = ?,
+          certificate_number = ?
+        WHERE id = ?
+      `);
+
+      await stmt
+        .bind(
+          certificate_unit,
+          instrument_name,
+          serial_number,
+          asset_number,
+          calibration_date,
+          certificate_number,
+          id
+        )
+        .run();
     }
-
-    // 然后更新其它字段
-    const stmt = env.DB.prepare(`
-      UPDATE certificates SET
-        certificate_unit = ?,
-        instrument_name = ?,
-        serial_number = ?,
-        asset_number = ?,
-        calibration_date = ?,
-        certificate_number = ?
-      WHERE id = ?
-    `);
-
-    await stmt.bind(
-      certificate_unit,
-      instrument_name,
-      serial_number,
-      asset_number,
-      calibration_date,
-      certificate_number,
-      new_id // 用新 ID 更新
-    ).run();
-
-    await env.DB.exec("COMMIT");
 
     return new Response(JSON.stringify({ success: true }), {
       headers: { "Content-Type": "application/json" },
     });
 
   } catch (e) {
-    await env.DB.exec("ROLLBACK").catch(() => {}); // 出错就回滚
     return new Response(JSON.stringify({ success: false, error: e.message }), {
       status: 500,
       headers: { "Content-Type": "application/json" },

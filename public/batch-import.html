@@ -108,33 +108,36 @@
     }
   }
 
-  function showQrLinks(ids) {
-    const recordsDiv = document.getElementById("records");
-    recordsDiv.innerHTML = "";
+function showQrLinks(ids) {
+  const recordsDiv = document.getElementById("records");
+  recordsDiv.innerHTML = "";
 
-    ids.forEach(id => {
-      const url = `${location.origin}/list.html?id=${id}`;
-      const wrapper = document.createElement("div");
-      wrapper.className = "record";
+  ids.forEach(id => {
+    const url = `${location.origin}/list.html?id=${id}`;
+    const wrapper = document.createElement("div");
+    wrapper.className = "record";
 
-      const qrCanvas = document.createElement("canvas");
-      QRCode.toCanvas(qrCanvas, url);
+    const qrCanvas = document.createElement("canvas");
 
-      const link = document.createElement("a");
-      link.href = url;
-      link.target = "_blank";
-      link.textContent = url;
+    // ✅ 关键改动：去掉二维码白边
+    QRCode.toCanvas(qrCanvas, url, { margin: 0 });
 
-      const qrDiv = document.createElement("div");
-      qrDiv.className = "qrcode";
-      qrDiv.appendChild(qrCanvas);
-      qrDiv.appendChild(link);
+    const link = document.createElement("a");
+    link.href = url;
+    link.target = "_blank";
+    link.textContent = url;
 
-      wrapper.appendChild(document.createTextNode(`证书 ID: ${id}`));
-      wrapper.appendChild(qrDiv);
-      recordsDiv.appendChild(wrapper);
-    });
-  }
+    const qrDiv = document.createElement("div");
+    qrDiv.className = "qrcode";
+    qrDiv.appendChild(qrCanvas);
+    qrDiv.appendChild(link);
+
+    wrapper.appendChild(document.createTextNode(`证书 ID: ${id}`));
+    wrapper.appendChild(qrDiv);
+    recordsDiv.appendChild(wrapper);
+  });
+}
+
 </script>
 
 

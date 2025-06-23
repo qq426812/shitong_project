@@ -166,7 +166,11 @@
       const inputValue = document.getElementById("certificateInput").value.trim();
       if (inputValue) {
         // 用证书编号输入时也可以做搜索，你也可以改为 ?certificate_number=xxx
-        window.location.href = `?id=${encodeURIComponent(inputValue)}`;
+       // window.location.href = `?id=${encodeURIComponent(inputValue)}`;
+        window.location.href = `?certificate_number=${encodeURIComponent(inputValue)}`;
+
+
+          
       }
     });
   };

@@ -6,7 +6,9 @@ CREATE TABLE certificates (
   asset_number TEXT,
   calibration_date TEXT,
   certificate_number TEXT,
-  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+  batch_id TEXT
+  
 );
 
 CREATE TABLE cert_lookup (
@@ -16,7 +18,8 @@ CREATE TABLE cert_lookup (
   calibration_date TEXT,
   instrument_name TEXT,
   serial_number TEXT,
-  asset_number TEXT
+  asset_number TEXT,
+  batch_id TEXT
 );
 
 CREATE TABLE certificates3 (
@@ -30,15 +33,17 @@ CREATE TABLE certificates3 (
   asset_number TEXT,
   manufacturer TEXT,
   calibration_date TEXT,
-  calibration_personnel TEXT
+  calibration_personnel TEXT,
+  batch_id TEXT
 );
 CREATE TABLE IF NOT EXISTS certificates_simple (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,         -- 自增主键
-  company TEXT NOT NULL,                         -- 公司名称
-  device TEXT NOT NULL,                          -- 设备名称
-  serial TEXT,                                   -- 出厂编号
-  management TEXT,                               -- 管理编号
-  calibration_date TEXT,                         -- 检/校日期（建议使用 YYYY-MM-DD）
-  certificate_number TEXT NOT NULL,              -- 证书编号
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- 创建时间
+  id INTEGER PRIMARY KEY AUTOINCREMENT, 
+  company TEXT NOT NULL, 
+  device TEXT NOT NULL,
+  serial TEXT, 
+  management TEXT,
+  calibration_date TEXT,
+  certificate_number TEXT NOT NULL, 
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  batch_id TEXT
 );

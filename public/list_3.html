@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>证书查询</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+            font-size: 1em;
+            color: #616161;
+        }
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #616161;
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .divider-container {
+            position: relative;
+            width: 100%;
+            margin: 0 auto;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .divider-container::before,
+        .divider-container::after {
+            content: '';
+            display: block;
+            width: 110%;
+            height: 1px;
+            background-color: #ccc;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .divider-container::before { top: 0; }
+        .divider-container::after { bottom: 0; }
+
+        input[type="text"],
+        button {
+            width: calc(100% - 40px);
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            box-sizing: border-box;
+            display: block;
+            margin: 0 auto;
+        }
+
+        input[type="text"] {
+            border: 1px solid #ccc;
+            z-index: 1;
+        }
+
+        button {
+            background-color: rgb(51, 136, 203);
+            color: white;
+            cursor: pointer;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            table-layout: fixed;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            word-wrap: break-word;
+        }
+
+        th {
+            width: 30%;
+            background-color: rgb(159, 212, 244);
+            color: #4f4f4f;
+        }
+
+        td a {
+            color: blue;
+            text-decoration: none;
+        }
+
+        td a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>请输入计量证书编号或证书条码</h1>
+        <form id="queryForm">
+            <div class="divider-container">
+                <input type="text" id="certificateInput" placeholder="请输入证书编号或条码">
+            </div>
+            <button type="submit">查询</button>
+        </form>
+        <table>
+            <tr><th>证书编号</th><td><a href="#" id="certificateNumber"></a></td></tr>
+            <tr><th>证书单位</th><td><a href="#" id="certificateUnit"></a></td></tr>
+            <tr><th>校准日期</th><td><a href="#" id="calibrationDate"></a></td></tr>
+            <tr><th>仪器名称</th><td><a href="#" id="deviceName"></a></td></tr>
+            <tr><th>出厂编号</th><td><a href="#" id="factorySerial"></a></td></tr>
+            <tr><th>管理编号</th><td><a href="#" id="managementNumber"></a></td></tr>
+        </table>
+    </div>
+
+   <script>
+  async function fetchAndRenderById(id) {
+    try {
+      const res = await fetch(`/api_1/cert-get?id=${encodeURIComponent(id)}`);
+      const data = await res.json();
+      console.log("按 ID 读取数据：", data);
+      renderRecord(data.record);
+    } catch (e) {
+      console.error("按 ID 查询失败", e);
+      alert("查询失败，请稍后再试");
+    }
+  }
+
+  async function fetchAndRenderByCertificateNumber(certNo) {
+    try {
+      const res = await fetch(`/api_1/cert-detail?certificate_number=${encodeURIComponent(certNo)}`);
+      const data = await res.json();
+      console.log("按证书编号读取数据：", data);
+      renderRecord(data.record);
+    } catch (e) {
+      console.error("按证书编号查询失败", e);
+      alert("查询失败，请稍后再试");
+    }
+  }
+
+  function renderRecord(record) {
+    if (!record) {
+      alert("未找到证书数据");
+      return;
+    }
+
+    document.getElementById("certificateNumber").textContent = record.certificate_number || '/';
+    document.getElementById("certificateUnit").textContent = record.certificate_unit || '/';
+    document.getElementById("calibrationDate").textContent = record.calibration_date || '/';
+    document.getElementById("deviceName").textContent = record.instrument_name || '/';
+    document.getElementById("factorySerial").textContent = record.serial_number || '/';
+    document.getElementById("managementNumber").textContent = record.asset_number || '/';
+  }
+
+  window.onload = () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const raw = urlParams.get("id") || urlParams.get("certificate_number");
+
+    if (raw) {
+      if (/^\d+$/.test(raw)) {
+        // 是数字 ID，调用 cert-get 接口
+        fetchAndRenderById(raw);
+      } else {
+        // 是证书编号，调用 cert-detail 接口
+        fetchAndRenderByCertificateNumber(raw);
+      }
+    }
+
+    document.getElementById("queryForm").addEventListener("submit", event => {
+      event.preventDefault();
+      const inputValue = document.getElementById("certificateInput").value.trim();
+      if (inputValue) {
+        // 查询方式统一为一个参数（兼容二维码和用户输入）
+        window.location.href = `?certificate_number=${encodeURIComponent(inputValue)}`;
+      }
+    });
+  };
+</script>
+
+
+</body>
+</html>

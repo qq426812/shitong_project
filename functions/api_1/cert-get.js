@@ -39,7 +39,7 @@ export const onRequestGet = async ({ request, env }) => {
 
     return new Response(JSON.stringify({
       success: true,
-      data: {
+      record: {
         certificate_number,
         certificate_unit,
         calibration_date,

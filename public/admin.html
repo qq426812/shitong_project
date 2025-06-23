@@ -66,7 +66,7 @@
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td><input type="checkbox" class="rowCheckbox" data-id="${row.id}" /></td>
-          <td>${row.id}</td>
+          <td><input type="text" value="${row.id}" data-key="id" /></td>
           <td><input type="text" value="${row.certificate_unit || ''}" data-key="certificate_unit" /></td>
           <td><input type="text" value="${row.instrument_name || ''}" data-key="instrument_name" /></td>
           <td><input type="text" value="${row.serial_number || ''}" data-key="serial_number" /></td>

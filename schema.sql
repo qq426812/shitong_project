@@ -32,3 +32,13 @@ CREATE TABLE certificates3 (
   calibration_date TEXT,
   calibration_personnel TEXT
 );
+CREATE TABLE IF NOT EXISTS certificates_simple (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,         -- 自增主键
+  company TEXT NOT NULL,                         -- 公司名称
+  device TEXT NOT NULL,                          -- 设备名称
+  serial TEXT,                                   -- 出厂编号
+  management TEXT,                               -- 管理编号
+  calibration_date TEXT,                         -- 检/校日期（建议使用 YYYY-MM-DD）
+  certificate_number TEXT NOT NULL,              -- 证书编号
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- 创建时间
+);

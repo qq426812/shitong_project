@@ -10,33 +10,47 @@ export const onRequestPost = async ({ request, env }) => {
     }
 
     let successCount = 0;
+    const insertedIds = [];
 
     for (const rec of records) {
       const stmt = env.DB.prepare(`
-        INSERT INTO cert_lookup (
+        INSERT INTO certificates3 (
           certificate_number,
           certificate_unit,
-          calibration_date,
+          certificate_type,
           instrument_name,
+          model,
           serial_number,
-          asset_number
-        ) VALUES (?, ?, ?, ?, ?, ?)
+          asset_number,
+          manufacturer,
+          calibration_date,
+          calibration_personnel
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `);
 
       const values = [
-        rec["证书编号"] || "",
-        rec["证书单位"] || "",
-        rec["校准日期"] || "",
-        rec["仪器名称"] || "",
-        rec["出厂编号"] || "",
-        rec["管理编号"] || ""
+        rec["certificate_number"] || rec["证书编号"] || "",
+        rec["certificate_unit"] || rec["证书单位"] || "",
+        rec["certificate_type"] || rec["证书类型"] || "",
+        rec["instrument_name"] || rec["仪器名称"] || "",
+        rec["model"] || rec["规格型号"] || "",
+        rec["serial_number"] || rec["出厂编号"] || "",
+        rec["asset_number"] || rec["管理编号"] || "",
+        rec["manufacturer"] || rec["制造厂商"] || "",
+        rec["calibration_date"] || rec["校准日期"] || "",
+        rec["calibration_personnel"] || rec["校准/检定员"] || ""
       ];
 
-      await stmt.bind(...values).run();
-      successCount++;
+      const result = await stmt.bind(...values).run();
+
+      // 插入成功后 result 会包含 lastInsertRowid
+      if (result && result.lastInsertRowid) {
+        insertedIds.push(result.lastInsertRowid);
+        successCount++;
+      }
     }
 
-    return new Response(JSON.stringify({ success: true, count: successCount }), {
+    return new Response(JSON.stringify({ success: true, count: successCount, ids: insertedIds }), {
       headers: { "Content-Type": "application/json" }
     });
 

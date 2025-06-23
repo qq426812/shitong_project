@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>后台管理 - 证书列表</title>
+  <title>后台管理 - 简化证书列表</title>
   <style>
     body { font-family: sans-serif; padding: 20px; }
     table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
@@ -16,7 +16,7 @@
   </style>
 </head>
 <body>
-  <h2>证书后台管理</h2>
+  <h2>简化证书后台管理</h2>
   <button onclick="deleteSelected()">🗑️ 批量删除所选</button>
 
   <table id="certTable">
@@ -24,16 +24,12 @@
       <tr>
         <th><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)" /></th>
         <th>ID</th>
-        <th>证书编号</th>
-        <th>证书单位</th>
-        <th>证书类型</th>
-        <th>仪器名称</th>
-        <th>规格型号</th>
+        <th>公司名称</th>
+        <th>设备名称</th>
         <th>出厂编号</th>
         <th>管理编号</th>
-        <th>制造厂商</th>
-        <th>校准日期</th>
-        <th>校准/检定员</th>
+        <th>检/校日期</th>
+        <th>证书编号</th>
         <th>操作</th>
       </tr>
     </thead>
@@ -48,7 +44,7 @@
     const pageSize = 30;
 
     async function fetchCerts() {
-      const res = await fetch('/api_3/cert-all');
+      const res = await fetch('/api_4/cert-all'); // ⬅️ 请确保对应的接口返回字段与此表一致
       const result = await res.json();
       if (!result.success) {
         alert('加载失败');
@@ -72,16 +68,12 @@
         tr.innerHTML = `
           <td><input type="checkbox" class="rowCheckbox" data-id="${row.id}" /></td>
           <td>${row.id}</td>
-          <td><input type="text" value="${row.certificate_number || ''}" data-key="certificate_number" /></td>
-          <td><input type="text" value="${row.certificate_unit || ''}" data-key="certificate_unit" /></td>
-          <td><input type="text" value="${row.certificate_type || ''}" data-key="certificate_type" /></td>
-          <td><input type="text" value="${row.instrument_name || ''}" data-key="instrument_name" /></td>
-          <td><input type="text" value="${row.model || ''}" data-key="model" /></td>
-          <td><input type="text" value="${row.serial_number || ''}" data-key="serial_number" /></td>
-          <td><input type="text" value="${row.asset_number || ''}" data-key="asset_number" /></td>
-          <td><input type="text" value="${row.manufacturer || ''}" data-key="manufacturer" /></td>
+          <td><input type="text" value="${row.company || ''}" data-key="company" /></td>
+          <td><input type="text" value="${row.device || ''}" data-key="device" /></td>
+          <td><input type="text" value="${row.serial || ''}" data-key="serial" /></td>
+          <td><input type="text" value="${row.management || ''}" data-key="management" /></td>
           <td><input type="text" value="${row.calibration_date || ''}" data-key="calibration_date" /></td>
-          <td><input type="text" value="${row.calibration_personnel || ''}" data-key="calibration_personnel" /></td>
+          <td><input type="text" value="${row.certificate_number || ''}" data-key="certificate_number" /></td>
           <td>
             <button onclick="updateCert(${row.id}, this)">保存</button>
             <button onclick="deleteCert(${row.id})">删除</button>
@@ -139,7 +131,7 @@
       inputs.forEach(input => {
         data[input.dataset.key] = input.value.trim();
       });
-      const res = await fetch('/api_3/cert-update', {
+      const res = await fetch('/api_4/cert-update', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -151,7 +143,7 @@
 
     async function deleteCert(id) {
       if (!confirm("确定要删除这条记录吗？")) return;
-      const res = await fetch('/api_3/cert-delete?id=' + id, { method: 'DELETE' });
+      const res = await fetch('/api_3/cert-simple-delete?id=' + id, { method: 'DELETE' });
       const result = await res.json();
       if (result.success) {
         alert("删除成功");
@@ -177,7 +169,7 @@
 
       for (const checkbox of selected) {
         const id = checkbox.dataset.id;
-        await fetch('/api_3/cert-delete?id=' + id, { method: 'DELETE' });
+        await fetch('/api_4/cert-delete?id=' + id, { method: 'DELETE' });
       }
 
       alert("批量删除完成");

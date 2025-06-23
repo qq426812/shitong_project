@@ -93,7 +93,7 @@
         }
 
         if (insertedIds.length > 0) {
-          showQrLinks(insertedIds);
+          showQrLinks(insertedIds, jsonData);
         } else {
           log.textContent += `⚠️ 无法获取证书 ID\n`;
         }
@@ -108,7 +108,7 @@
     }
   }
 
-function showQrLinks(ids) {
+function showQrLinks(ids, records) {
   const recordsDiv = document.getElementById("records");
   recordsDiv.innerHTML = "";
 
@@ -118,8 +118,6 @@ function showQrLinks(ids) {
     wrapper.className = "record";
 
     const qrCanvas = document.createElement("canvas");
-
-    // ✅ 关键改动：去掉二维码白边
     QRCode.toCanvas(qrCanvas, url, { margin: 0 });
 
     const link = document.createElement("a");
@@ -132,11 +130,16 @@ function showQrLinks(ids) {
     qrDiv.appendChild(qrCanvas);
     qrDiv.appendChild(link);
 
-    wrapper.appendChild(document.createTextNode(`证书 ID: ${id}`));
+    // ✅ 提取对应的证书编号字段
+    const index = ids.indexOf(id);
+    const certNo = records[index]?.["证书编号"] || `ID: ${id}`;
+    wrapper.appendChild(document.createTextNode(`证书编号: ${certNo}`));
+
     wrapper.appendChild(qrDiv);
     recordsDiv.appendChild(wrapper);
   });
 }
+
 
 </script>
 

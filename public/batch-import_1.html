@@ -49,7 +49,7 @@
       log.textContent = `读取到 ${jsonData.length} 条记录，正在上传...\n`;
       console.log("读取数据：", jsonData);
 
-      const res = await fetch("/api/cert-batch", {
+      const res = await fetch("/api_1/cert-batch", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ records: jsonData })
@@ -69,7 +69,7 @@
         if (insertedIds.length === 0) {
           console.warn("返回为空 ID，尝试调用 cert-latest 接口");
 
-          const latestRes = await fetch("/api/cert-latest");
+          const latestRes = await fetch("/api_1/cert-latest");
           const latest = await latestRes.json();
           console.log("获取最新 ID 返回：", latest);
 

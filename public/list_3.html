@@ -161,7 +161,13 @@
         calibration_personnel: 'calibration-personnel',
       };
       Object.entries(mapping).forEach(([key, id]) => {
-        document.getElementById(id).textContent = data[key] ?? '-';
+         let value = data[key] ?? '-';
+
+    // 特别处理日期格式：将 2025-10-1 转换为 2025/10/1
+    if (key === 'calibration_date' && typeof value === 'string' && value !== '-') {
+      value = value.replace(/-/g, '/');
+    }
+        document.getElementById(id).textContent = value;
         
       });
     }

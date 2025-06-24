@@ -162,10 +162,7 @@
       };
       Object.entries(mapping).forEach(([key, id]) => {
         document.getElementById(id).textContent = data[key] ?? '-';
-        if (key === 'calibration_date' &&typeof value === 'string') {
-                value = value.replace(/-/g, '/');
-                data[key] = value;
-              }
+        
       });
     }
 

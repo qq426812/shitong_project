@@ -65,9 +65,15 @@
       if (result.success && result.data) {
         const cert = result.data;
         // 特别处理日期格式：将 2025-10-1 转换为 2025/10/1
-    if (cert.calibration_date !== '') {
-      cert.calibration_date = cert.calibration_date.replace(/-/g, '/');
-    }
+   if (
+          typeof cert.calibration_date === 'string' &&
+          cert.calibration_date !== '' &&
+          cert.calibration_date !== '-' &&
+          cert.calibration_date.includes('-')
+        ) {
+          cert.calibration_date = cert.calibration_date.replace(/-/g, '/');
+        }
+
         document.getElementById(id).textContent = value;
         document.getElementById('company').textContent = cert.company || '-';
         document.getElementById('device').textContent = cert.device || '-';

@@ -64,6 +64,11 @@
       const result = await res.json();
       if (result.success && result.data) {
         const cert = result.data;
+        // 特别处理日期格式：将 2025-10-1 转换为 2025/10/1
+    if (cert.calibration_date !== '') {
+      cert.calibration_date = cert.calibration_date.replace(/-/g, '/');
+    }
+        document.getElementById(id).textContent = value;
         document.getElementById('company').textContent = cert.company || '-';
         document.getElementById('device').textContent = cert.device || '-';
         document.getElementById('serial').textContent = cert.serial || '-';

@@ -59,14 +59,15 @@
         "证书编号": "certificate_number"
       };
 
+        // Excel日期序列转 YYYY-MM-DD
       function excelDateToString(serial) {
         if (!serial || isNaN(serial)) return "";
         const utcDays = Math.floor(serial - 25569);
         const date = new Date(utcDays * 86400 * 1000);
         return date.toISOString().split("T")[0];
       }
-
-      const jsonData = rawData.map(record => {
+      
+      jsonData = rawData.map(record => {
         const normalized = {};
         for (const key in record) {
           const mappedKey = fieldMap[key] || key;

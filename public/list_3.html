@@ -162,11 +162,7 @@
       };
       Object.entries(mapping).forEach(([key, id]) => {
         document.getElementById(id).textContent = data[key] ?? '-';
-        if (
-                key === 'calibration_date' &&
-                typeof value === 'string' &&
-                /^\d{4}-\d{1,2}-\d{1,2}$/.test(value)
-              ) {
+        if (key === 'calibration_date' &&typeof value === 'string') {
                 value = value.replace(/-/g, '/');
                 data[key] = value;
               }

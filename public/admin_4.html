@@ -2,7 +2,7 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>后台管理 - 简化证书列表</title>
   <style>
     body { font-family: sans-serif; padding: 20px; }
@@ -39,29 +39,26 @@
   <div class="pagination" id="pagination"></div>
 
   <script>
-    let allData = [];
     let currentPage = 1;
     const pageSize = 30;
+    let totalCount = 0;
 
-    async function fetchCerts() {
-      const res = await fetch('/api_4/cert-all'); // ⬅️ 请确保对应的接口返回字段与此表一致
+    async function fetchCerts(page = 1) {
+      const res = await fetch(`/api_4/cert-all?page=${page}&pageSize=${pageSize}`);
       const result = await res.json();
       if (!result.success) {
         alert('加载失败');
         return;
       }
-      allData = result.data || [];
-      currentPage = 1;
-      renderPage(currentPage);
+      totalCount = result.totalCount || 0;
+      currentPage = page;
+      renderPage(result.data);
+      renderPaginationControls();
     }
 
-    function renderPage(page) {
+    function renderPage(pageData) {
       const tbody = document.querySelector("#certTable tbody");
       tbody.innerHTML = "";
-
-      const start = (page - 1) * pageSize;
-      const end = start + pageSize;
-      const pageData = allData.slice(start, end);
 
       pageData.forEach(row => {
         const tr = document.createElement("tr");
@@ -81,24 +78,19 @@
         `;
         tbody.appendChild(tr);
       });
-
-      renderPaginationControls();
     }
 
     function renderPaginationControls() {
       const paginationDiv = document.getElementById("pagination");
       paginationDiv.innerHTML = "";
 
-      const totalPages = Math.ceil(allData.length / pageSize);
+      const totalPages = Math.ceil(totalCount / pageSize);
 
       const prevBtn = document.createElement("button");
       prevBtn.textContent = "« 上一页";
       prevBtn.disabled = currentPage === 1;
       prevBtn.onclick = () => {
-        if (currentPage > 1) {
-          currentPage--;
-          renderPage(currentPage);
-        }
+        if (currentPage > 1) fetchCerts(currentPage - 1);
       };
       paginationDiv.appendChild(prevBtn);
 
@@ -106,10 +98,7 @@
         const pageBtn = document.createElement("button");
         pageBtn.textContent = i;
         if (i === currentPage) pageBtn.disabled = true;
-        pageBtn.onclick = () => {
-          currentPage = i;
-          renderPage(currentPage);
-        };
+        pageBtn.onclick = () => fetchCerts(i);
         paginationDiv.appendChild(pageBtn);
       }
 
@@ -117,10 +106,7 @@
       nextBtn.textContent = "下一页 »";
       nextBtn.disabled = currentPage === totalPages;
       nextBtn.onclick = () => {
-        if (currentPage < totalPages) {
-          currentPage++;
-          renderPage(currentPage);
-        }
+        if (currentPage < totalPages) fetchCerts(currentPage + 1);
       };
       paginationDiv.appendChild(nextBtn);
     }
@@ -147,7 +133,7 @@
       const result = await res.json();
       if (result.success) {
         alert("删除成功");
-        fetchCerts();
+        fetchCerts(currentPage);
       } else {
         alert("删除失败: " + result.error);
       }
@@ -173,9 +159,10 @@
       }
 
       alert("批量删除完成");
-      fetchCerts();
+      fetchCerts(currentPage);
     }
 
+    // 页面加载时默认拉取第一页数据
     fetchCerts();
   </script>
 </body>

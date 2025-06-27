@@ -2,7 +2,8 @@ export async function onRequestGet({ request, env }) {
   try {
     const { searchParams } = new URL(request.url);
     const page = Math.max(parseInt(searchParams.get("page") || "1"), 1);
-    const pageSize = Math.max(parseInt(searchParams.get("pageSize") || "30"), 1);
+    const maxPageSize = 100;
+    const pageSize = Math.min(Math.max(parseInt(searchParams.get("pageSize") || "30"), 1), maxPageSize);
     const offset = (page - 1) * pageSize;
 
     const countStmt = env.DB.prepare("SELECT COUNT(*) AS count FROM certificates3");
@@ -16,13 +17,14 @@ export async function onRequestGet({ request, env }) {
       success: true,
       data: result.results,
       total
-    }), { 
-      headers: { 
+    }), {
+      headers: {
         'Content-Type': 'application/json',
-        'Cache-Control': 'no-store' 
-      } 
+        'Cache-Control': 'no-store'
+      }
     });
   } catch (e) {
+    console.error("API error:", e);
     return new Response(JSON.stringify({
       success: false,
       error: e.message

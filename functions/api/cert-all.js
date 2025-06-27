@@ -1,5 +1,20 @@
-export async function onRequestGet({ env }) {
-  const stmt = env.DB.prepare("SELECT * FROM certificates ORDER BY id DESC");
-  const all = await stmt.all();
-  return new Response(JSON.stringify({ success: true, data: all.results }), { headers: { 'Content-Type': 'application/json' } });
+// /api/cert-list
+export async function onRequestGet({ request, env }) {
+  const { searchParams } = new URL(request.url);
+  const page = parseInt(searchParams.get("page") || "1");
+  const pageSize = parseInt(searchParams.get("pageSize") || "30");
+  const offset = (page - 1) * pageSize;
+
+  const countStmt = env.DB.prepare("SELECT COUNT(*) AS count FROM certificates");
+  const countResult = await countStmt.first();
+  const total = countResult.count;
+
+  const stmt = env.DB.prepare("SELECT * FROM certificates ORDER BY id DESC LIMIT ? OFFSET ?");
+  const result = await stmt.bind(pageSize, offset).all();
+
+  return new Response(JSON.stringify({
+    success: true,
+    data: result.results,
+    total
+  }), { headers: { 'Content-Type': 'application/json' } });
 }

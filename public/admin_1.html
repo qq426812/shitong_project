@@ -45,7 +45,7 @@
   let allData = [];
 
   async function fetchCerts(page = 1) {
-    const res = await fetch(`/api_1/cert-list?page=${page}&pageSize=${pageSize}`);
+    const res = await fetch(`/api_1/cert-all?page=${page}&pageSize=${pageSize}`);
     const result = await res.json();
     if (!result.success) {
       alert('加载失败');

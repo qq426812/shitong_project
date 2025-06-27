@@ -57,7 +57,7 @@
           return;
         }
         renderPage(result.data || []);
-        totalPages = Math.ceil((result.totalCount || 0) / pageSize);
+        totalPages = Math.ceil((result.total || 0) / pageSize);
         renderPaginationControls();
       } catch (error) {
         alert("请求失败: " + error.message);

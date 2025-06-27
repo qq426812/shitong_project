@@ -45,7 +45,7 @@
   <script>
     let currentPage = 1;
     const pageSize = 30;
-    let totalPages = 1;  // 从接口获取总页数
+    let totalPages = 1;
 
     async function fetchCerts(page = 1) {
       currentPage = page;
@@ -53,10 +53,9 @@
         const res = await fetch(`/api_3/cert-all?page=${page}&pageSize=${pageSize}`);
         const result = await res.json();
         if (!result.success) {
-          alert('加载失败');
+          alert('加载失败: ' + (result.error || '未知错误'));
           return;
         }
-        // 这里假设接口返回结构是 { success, data: [...], totalCount: n }
         renderPage(result.data || []);
         totalPages = Math.ceil((result.totalCount || 0) / pageSize);
         renderPaginationControls();
@@ -91,6 +90,7 @@
         `;
         tbody.appendChild(tr);
       });
+      document.getElementById('selectAll').checked = false; // 清空全选状态
     }
 
     function renderPaginationControls() {
@@ -101,13 +101,10 @@
       prevBtn.textContent = "« 上一页";
       prevBtn.disabled = currentPage === 1;
       prevBtn.onclick = () => {
-        if (currentPage > 1) {
-          fetchCerts(currentPage - 1);
-        }
+        if (currentPage > 1) fetchCerts(currentPage - 1);
       };
       paginationDiv.appendChild(prevBtn);
 
-      // 这里为了避免按钮太多，可以限制显示部分页码
       const maxPageButtons = 7;
       let startPage = Math.max(1, currentPage - Math.floor(maxPageButtons / 2));
       let endPage = Math.min(totalPages, startPage + maxPageButtons - 1);
@@ -118,10 +115,8 @@
       for (let i = startPage; i <= endPage; i++) {
         const pageBtn = document.createElement("button");
         pageBtn.textContent = i;
-        if (i === currentPage) pageBtn.disabled = true;
-        pageBtn.onclick = () => {
-          fetchCerts(i);
-        };
+        pageBtn.disabled = (i === currentPage);
+        pageBtn.onclick = () => fetchCerts(i);
         paginationDiv.appendChild(pageBtn);
       }
 
@@ -129,9 +124,7 @@
       nextBtn.textContent = "下一页 »";
       nextBtn.disabled = currentPage === totalPages;
       nextBtn.onclick = () => {
-        if (currentPage < totalPages) {
-          fetchCerts(currentPage + 1);
-        }
+        if (currentPage < totalPages) fetchCerts(currentPage + 1);
       };
       paginationDiv.appendChild(nextBtn);
     }
@@ -150,7 +143,7 @@
         });
         const result = await res.json();
         if (result.success) alert("更新成功");
-        else alert("更新失败: " + result.error);
+        else alert("更新失败: " + (result.error || '未知错误'));
       } catch (err) {
         alert("请求失败: " + err.message);
       }
@@ -165,7 +158,7 @@
           alert("删除成功");
           fetchCerts(currentPage);
         } else {
-          alert("删除失败: " + result.error);
+          alert("删除失败: " + (result.error || '未知错误'));
         }
       } catch (err) {
         alert("请求失败: " + err.message);
@@ -186,13 +179,17 @@
 
       if (!confirm(`确定要删除这 ${selected.length} 条记录吗？`)) return;
 
-      for (const checkbox of selected) {
-        const id = checkbox.dataset.id;
-        await fetch('/api_3/cert-delete?id=' + id, { method: 'DELETE' });
+      try {
+        // 并发执行删除，提升效率
+        await Promise.all(Array.from(selected).map(cb => {
+          const id = cb.dataset.id;
+          return fetch('/api_3/cert-delete?id=' + id, { method: 'DELETE' });
+        }));
+        alert("批量删除完成");
+        fetchCerts(currentPage);
+      } catch (err) {
+        alert("批量删除请求失败: " + err.message);
       }
-
-      alert("批量删除完成");
-      fetchCerts(currentPage);
     }
 
     // 初始化加载第一页

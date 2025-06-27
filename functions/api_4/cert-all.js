@@ -1,16 +1,16 @@
-export async function onRequestGet({ env, url }) {
+export async function onRequestGet({ request, env }) {
   try {
-    // 从url参数获取分页参数
-    const page = parseInt(url.searchParams.get('page')) || 1;
-    const pageSize = parseInt(url.searchParams.get('pageSize')) || 30;
+    const { searchParams } = new URL(request.url);
+    const page = Math.max(parseInt(searchParams.get('page') || '1'), 1);
+    const pageSize = Math.max(parseInt(searchParams.get('pageSize') || '30'), 1);
     const offset = (page - 1) * pageSize;
 
     // 查询总条数
     const countStmt = env.DB.prepare('SELECT COUNT(*) AS count FROM certificates_simple');
-    const countResult = await countStmt.all();
-    const totalCount = countResult.results[0]?.count || 0;
+    const countResult = await countStmt.first();
+    const total = countResult?.count || 0;
 
-    // 分页查询
+    // 分页查询数据
     const dataStmt = env.DB.prepare(`
       SELECT 
         id,
@@ -24,13 +24,13 @@ export async function onRequestGet({ env, url }) {
       ORDER BY id DESC
       LIMIT ? OFFSET ?
     `);
-    const dataResult = await dataStmt.all(pageSize, offset);
+    const dataResult = await dataStmt.bind(pageSize, offset).all();  // ✅ 必须 .bind(...).all()
 
     return new Response(
       JSON.stringify({
         success: true,
         data: dataResult.results,
-        totalCount
+        total  // ✅ 与前端统一字段
       }),
       {
         headers: {

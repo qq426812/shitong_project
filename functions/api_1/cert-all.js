@@ -1,23 +1,19 @@
-export async function onRequestGet({ env }) {
-  const stmt = env.DB.prepare(`
-    SELECT 
-      id,
-      certificate_number,
-      certificate_unit,
-      calibration_date,
-      instrument_name,
-      serial_number,
-      asset_number
-    FROM cert_lookup
-    ORDER BY id DESC
-  `);
+export async function onRequestGet({ request, env }) {
+  const { searchParams } = new URL(request.url);
+  const page = parseInt(searchParams.get("page") || "1");
+  const pageSize = parseInt(searchParams.get("pageSize") || "30");
+  const offset = (page - 1) * pageSize;
 
-  const result = await stmt.all();
+  const countStmt = env.DB.prepare("SELECT COUNT(*) AS count FROM cert_lookup");
+  const countResult = await countStmt.first();
+  const total = countResult.count;
 
-  return new Response(
-    JSON.stringify({ success: true, data: result.results }),
-    {
-      headers: { 'Content-Type': 'application/json' }
-    }
-  );
+  const stmt = env.DB.prepare("SELECT * FROM cert_lookup ORDER BY id DESC LIMIT ? OFFSET ?");
+  const result = await stmt.bind(pageSize, offset).all();
+
+  return new Response(JSON.stringify({
+    success: true,
+    data: result.results,
+    total
+  }), { headers: { 'Content-Type': 'application/json' } });
 }

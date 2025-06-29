@@ -113,8 +113,12 @@ async function showQrLinksAndZip(ids, records) {
     const wrapper = document.createElement("div");
     wrapper.className = "record";
 
+    
+
     const qrCanvas = document.createElement("canvas");
-    await QRCode.toCanvas(qrCanvas, url, { margin: 0 });
+    await QRCode.toCanvas(qrCanvas, url, { margin: 0, width: 78 });
+    
+   
 
     const link = document.createElement("a");
     link.href = url;

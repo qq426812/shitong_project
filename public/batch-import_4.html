@@ -75,7 +75,7 @@ async function handleImport() {
       return date.toISOString().split("T")[0];
     }
 
-    const jsonData = rawData.map(record => {
+    let jsonData = rawData.map(record => {
       const normalized = {};
       for (const key in record) {
         const mappedKey = fieldMap[key] || key;

@@ -25,6 +25,20 @@
 <script>
 let insertedIds = [];
 
+function sanitizeRecord(rec) {
+  const fix = val => (typeof val === "number" ? String(val).replace(/\.0$/, "") : String(val || "").trim());
+
+  return {
+    ...rec,
+    "出厂编号": fix(rec["出厂编号"]),
+    "管理编号": fix(rec["管理编号"]),
+    "证书编号": fix(rec["证书编号"]),
+    "校准日期": fix(rec["校准日期"]),
+    "公司名称": fix(rec["公司名称"]),
+    "设备名称": fix(rec["设备名称"])
+  };
+}
+
 async function handleImport() {
   const fileInput = document.getElementById("excelFile");
   const log = document.getElementById("log");
@@ -45,8 +59,11 @@ async function handleImport() {
     if (!sheetName) return alert("Excel 文件中未找到任何工作表");
 
     const sheet = workbook.Sheets[sheetName];
-    jsonData = XLSX.utils.sheet_to_json(sheet);
-    if (!jsonData.length) return alert("Excel 文件中没有有效数据");
+    const rawData = XLSX.utils.sheet_to_json(sheet);
+    if (!rawData.length) return alert("Excel 文件中没有有效数据");
+
+    // 🧹 执行字段清洗
+    jsonData = rawData.map(sanitizeRecord);
 
     log.textContent = `读取到 ${jsonData.length} 条记录，正在上传...\n`;
 
@@ -113,12 +130,8 @@ async function showQrLinksAndZip(ids, records) {
     const wrapper = document.createElement("div");
     wrapper.className = "record";
 
-    
-
     const qrCanvas = document.createElement("canvas");
     await QRCode.toCanvas(qrCanvas, url, { margin: 0, width: 77.09 });
-    
-   
 
     const link = document.createElement("a");
     link.href = url;
@@ -134,13 +147,11 @@ async function showQrLinksAndZip(ids, records) {
     wrapper.appendChild(qrDiv);
     recordsDiv.appendChild(wrapper);
 
-    // 将 canvas 转为 base64 并加入 ZIP
     const dataUrl = qrCanvas.toDataURL("image/png");
     const base64 = dataUrl.split(',')[1];
     zip.file(fileName, base64, { base64: true });
   }
 
-  // 生成 zip 并自动下载
   zip.generateAsync({ type: "blob" }).then(content => {
     const a = document.createElement("a");
     a.href = URL.createObjectURL(content);

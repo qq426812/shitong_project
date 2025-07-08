@@ -25,6 +25,18 @@
 <script>
 let insertedIds = [];
 
+function sanitizeRecord(rec) {
+  const fix = val => (typeof val === "number" ? String(val).replace(/\.0$/, "") : String(val || "").trim());
+
+  return {
+    ...rec,
+    "出厂编号": fix(rec["出厂编号"]),
+    "管理编号": fix(rec["管理编号"]),
+    "证书编号": fix(rec["证书编号"])
+    
+  };
+}
+
 async function handleImport() {
   const fileInput = document.getElementById("excelFile");
   const log = document.getElementById("log");
@@ -78,6 +90,8 @@ async function handleImport() {
 
     if (!jsonData.length) return alert("Excel 文件中没有有效数据");
 
+        // 🧹 执行字段清洗
+    jsonData = jsonData.map(sanitizeRecord);
     log.textContent = `读取到 ${jsonData.length} 条记录，正在上传...\n`;
 
     const res = await fetch("/api_4/cert-batch", {

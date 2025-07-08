@@ -24,21 +24,6 @@
 
 <script>
 let insertedIds = [];
-  
-  function sanitizeRecord(rec) {
-  const fix = val => (typeof val === "number" ? String(val).replace(/\.0$/, "") : String(val || "").trim());
-
-  return {
-    ...rec,
-    "出厂编号": fix(rec["出厂编号"]),
-    "管理编号": fix(rec["管理编号"]),
-    "证书编号": fix(rec["证书编号"]),
-    "校准日期": fix(rec["校准日期"]),
-  };
-}
-
-  
-
 async function handleImport() {
   const fileInput = document.getElementById("excelFile");
   const log = document.getElementById("log");
@@ -61,8 +46,6 @@ async function handleImport() {
     const sheet = workbook.Sheets[sheetName];
     jsonData = XLSX.utils.sheet_to_json(sheet);
     if (!jsonData.length) return alert("Excel 文件中没有有效数据");
-    
-    jsonData = rawData.map(sanitizeRecord);
 
     log.textContent = `读取到 ${jsonData.length} 条记录，正在上传...\n`;
 

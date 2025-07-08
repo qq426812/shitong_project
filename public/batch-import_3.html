@@ -92,7 +92,7 @@ async function handleImport() {
 
     if (!jsonData.length) return alert("Excel 文件中没有有效数据");
         // 🧹 执行字段清洗
-    jsonData = rawData.map(sanitizeRecord);
+    jsonData = jsonData.map(sanitizeRecord);
 
     log.textContent = `读取到 ${jsonData.length} 条记录，正在上传...\n`;
 

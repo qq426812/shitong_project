@@ -77,7 +77,7 @@ async function handleImport() {
       return date.toISOString().split("T")[0];
     }
 
-    const jsonData = rawData.map(record => {
+    let  jsonData = rawData.map(record => {
       const normalized = {};
       for (const key in record) {
         const mappedKey = fieldMap[key] || key;
@@ -92,7 +92,7 @@ async function handleImport() {
 
     if (!jsonData.length) return alert("Excel 文件中没有有效数据");
       
-    //jsonData = jsonData.map(sanitizeRecord);
+    jsonData = jsonData.map(sanitizeRecord);
 
     log.textContent = `读取到 ${jsonData.length} 条记录，正在上传...\n`;
 

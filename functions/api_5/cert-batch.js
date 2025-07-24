@@ -26,13 +26,13 @@ export const onRequestPost = async ({ request, env }) => {
           batch_id
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
       `).bind(
-        rec["证书编号"] || "",
-        rec["公司名称"] || "",
-        rec["设备名称"] || "",
-        rec["规格型号"] || "",
-        rec["出厂编号"] || "",
-        rec["管理编号"] || "",
-        rec["校准日期"] || "",
+        rec.certificate_number || "",
+        rec.certificate_unit || "",
+        rec.instrument_name || "",
+        rec.model_spec || "",
+        rec.serial_number || "",
+        rec.asset_number || "",
+        rec.calibration_date || "",
         batchId
       ).run();
 

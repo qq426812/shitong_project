@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>计检800客服平台</title>
+<link href="http://www.jj800.org/Content/images/20170904110032.png" rel="shortcut icon" />
+<style>
+    @media screen and (min-width: 768px) {
+        body {
+            background-image: none !important;
+            color: #bb0e0e !important;
+        }
+        .container {
+            max-width: 900px;
+            background-image: url(http://www.jj800.org/Content/ImgCert/certbg3.jpg);
+            background-repeat: repeat;
+            color: white;
+            background-size: cover;
+            margin: 10px auto;
+            height: 960px;
+        }
+        .top {
+            text-align: center;
+            margin-left: 12%;
+            height: 90px !important;
+        }
+        .moddile-title {
+            margin-bottom: 28px !important;
+        }
+        .cn-title {
+            font-size: 22px !important;
+        }
+        .en-title {
+            margin-left: -41% !important;
+            font-size:22px !important;
+            width: 183% !important;
+        }
+        .img {
+            width: 60px !important;
+            height: 60px !important;
+            margin-right: -10% !important;
+        }
+
+        .box {
+            width: 60% !important;
+        }
+
+        .item {
+            padding: 20px !important;
+        }
+
+        .item-hr {
+            left: 46% !important;
+            height: 550px !important;
+        }
+
+        .img-huiz {
+            right: -46px !important;
+        }
+
+        .text-huiz {
+            right: 34px !important;
+        }
+
+        .buttom {
+            width: 56% !important;
+            margin: 18px auto !important;
+        }
+
+        .slug {
+            width: 66% !important;
+        }
+    }
+
+    body {
+        background-image: url(http://www.jj800.org/Content/ImgCert/certbg2.jpg);
+        background-repeat: repeat;
+        color: white;
+        background-size: cover;
+    }
+
+    .container {
+        font-family: revert;
+        overflow: hidden;
+    }
+
+    .top {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        height: 60px;
+    }
+
+    .title-box {
+        display: flex;
+        flex-direction: column;
+        width: 60%;
+        margin-left: 2%;
+    }
+
+    .moddile-title {
+        text-decoration: underline;
+        font-weight: bold;
+        font-size: 22px;
+        text-align: center;
+        margin: 0;
+    }
+
+    .img {
+        width: 50px;
+        height: 50px;
+        margin-right: 0%;
+    }
+
+    .cn-title {
+        font-size: 14px;
+        margin: 0;
+        font-weight:bold;
+    }
+
+    .en-title {
+        font-size:14px;
+        margin: 0;
+        transform: scale(0.6);
+        font-family: -webkit-pictograph;
+        width: 190%;
+        margin-left: -38%;
+    }
+
+    .box {
+        position: relative;
+        width: 90%;
+        margin: 10px auto;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+    }
+
+    .item {
+        width: 90%;
+        padding: 10px;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+        align-items: center;
+        border-bottom: 1px solid #3D4E79;
+        font-weight: bold;
+    }
+
+    .item-left {
+        width: 40%;
+        text-align: left;
+    }
+
+    .item-right {
+        width: 50%;
+        z-index:2;
+        text-align: left;
+        word-break: break-word;
+    }
+
+    .item-hr {
+        height: 370px;
+        border-right: 1px solid #3D4E79;
+        position: absolute;
+        left: 40%;
+    }
+
+    .img-huiz {
+        width: 176px;
+        position: absolute;
+        right: -47px;
+        top: -76px;
+    }
+
+    .text-huiz {
+        color: #E8B689;
+        position: absolute;
+        right: 34px;
+        top: 60px;
+        font-size: 15px;
+        transform: rotateZ(30deg);
+    }
+
+    .buttom {
+        width: 76%;
+        display: flex;        
+        font-size:18px;
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-start;
+        margin-left: 15%;
+        flex-wrap: wrap;
+    }
+
+    .slug {
+        width: 90%;
+        font-size:22px;
+        font-weight:bold;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+        align-items: center;
+        margin: 0 auto;
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="top">
+        <img src="http://www.jj800.org/Content/ImgCert/logo.png" alt="logo" class="img">
+        <div class="title-box">
+            <p class="cn-title">深圳天溯计量检测股份有限公司</p>
+            <p class="en-title">Shenzhen Tiansu Calibration and Testing Co., Ltd.</p>
+        </div>
+    </div>
+    <p class="moddile-title">电子证书防伪查询</p>
+    <div class="box">
+        <div class="item-hr"></div>
+        <img src="http://www.jj800.org/Content/ImgCert/huiz.png" alt="有效" class="img-huiz">
+        <p class="text-huiz" id="status-text">有效</p>
+
+        <div class="item">
+            <div class="item-left">委托单位</div>
+            <div class="item-right" id="certificate_unit">加载中...</div>
+        </div>
+        <div class="item">
+            <div class="item-left">证书编号</div>
+            <div class="item-right" id="certificate_number">加载中...</div>
+        </div>
+        <div class="item">
+            <div class="item-left">查询状态</div>
+            <div class="item-right" id="status" style="color:#26ff07;">加载中...</div>
+        </div>
+        <div class="item">
+            <div class="item-left">仪器名称</div>
+            <div class="item-right" id="instrument_name">加载中...</div>
+        </div>
+        <div class="item">
+            <div class="item-left">规格型号</div>
+            <div class="item-right" id="model_spec">加载中...</div>
+        </div>
+        <div class="item">
+            <div class="item-left">出厂编号</div>
+            <div class="item-right" id="serial_number">加载中...</div>
+        </div>
+        <div class="item">
+            <div class="item-left">管理编号</div>
+            <div class="item-right" id="asset_number">加载中...</div>
+        </div>
+        <div class="item">
+            <div class="item-left">发布日期</div>
+            <div class="item-right" id="calibration_date">加载中...</div>
+        </div>
+    </div>
+    <div class="buttom">
+        <div>电话: 0755-84815081</div>
+        <div class="address">地址: 深圳市龙岗区锦龙大道2号</div>
+    </div>
+    <div class="slug">
+        <p>为品质溯源保驾护航 </p>
+    </div>
+</div>
+
+<script>
+async function loadCertData() {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+    if (!id) {
+        alert('缺少 id 参数');
+        return;
+    }
+
+    try {
+        const res = await fetch(`/api_5/cert-get?id=${id}`);
+        const result = await res.json();
+
+        if (!result.success) {
+            alert('获取数据失败：' + result.error);
+            return;
+        }
+
+        const data = result.data;
+
+        // 状态展示，如果状态为空或不是"有效"，则显示灰色“无效”
+        const statusTextEl = document.getElementById('status-text');
+        const statusEl = document.getElementById('status');
+        if (data.status && data.status === '有效') {
+            statusTextEl.textContent = '有效';
+            statusEl.textContent = '有效';
+            statusEl.style.color = '#26ff07';
+        } else {
+            statusTextEl.textContent = '无效';
+            statusEl.textContent = '无效';
+            statusEl.style.color = '#aaa';
+        }
+
+        document.getElementById('certificate_unit').textContent = data.certificate_unit || '/';
+        document.getElementById('certificate_number').textContent = data.certificate_number || '/';
+        document.getElementById('instrument_name').textContent = data.instrument_name || '/';
+        document.getElementById('model_spec').textContent = data.model_spec || '/';
+        document.getElementById('serial_number').textContent = data.serial_number || '/';
+        document.getElementById('asset_number').textContent = data.asset_number || '/';
+        document.getElementById('calibration_date').textContent = data.calibration_date || '/';
+
+    } catch (error) {
+        alert('请求接口失败：' + error.message);
+    }
+}
+
+loadCertData();
+</script>
+
+</body>
+</html>

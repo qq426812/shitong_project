@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>批量导入证书</title>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <style>
+    body { font-family: sans-serif; max-width: 900px; margin: auto; padding: 20px; }
+    .record { margin-top: 20px; padding: 10px; border: 1px solid #ccc; border-radius: 6px; }
+    .qrcode { margin-top: 10px; text-align: center; }
+    .qrcode a { display: block; margin-top: 5px; word-break: break-all; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <h1>二维码5</h1>
+  <input type="file" id="excelFile" accept=".xlsx">
+  <button onclick="handleImport()">导入证书</button>
+  <pre id="log"></pre>
+  <div id="records"></div>
+
+<script>
+let insertedIds = [];
+
+function sanitizeRecord(rec) {
+  const fix = val => (typeof val === "number" ? String(val).replace(/\.0$/, "") : String(val || "").trim());
+
+  return {
+    certificate_number: fix(rec["证书编号"]),
+    certificate_unit: fix(rec["公司名称"]),
+    instrument_name: fix(rec["设备名称"]),
+    model_spec: fix(rec["规格型号"]),
+    serial_number: fix(rec["出厂编号"]),
+    asset_number: fix(rec["管理编号"]),
+    calibration_date: fix(rec["校准日期"]),
+    status: fix(rec["状态"] || "有效")
+    
+  };
+}
+
+async function handleImport() {
+  const fileInput = document.getElementById("excelFile");
+  const log = document.getElementById("log");
+  const recordsDiv = document.getElementById("records");
+  log.textContent = "";
+  recordsDiv.innerHTML = "";
+  insertedIds = [];
+
+  if (!fileInput.files[0]) return alert("请先选择一个 Excel 文件");
+
+  try {
+    const file = fileInput.files[0];
+    const data = await file.arrayBuffer();
+    const workbook = XLSX.read(data, { type: "array", raw: false });
+    const sheetName = workbook.SheetNames[0];
+    if (!sheetName) return alert("Excel 文件中未找到任何工作表");
+
+    const sheet = workbook.Sheets[sheetName];
+    const rawData = XLSX.utils.sheet_to_json(sheet);
+    if (!rawData.length) return alert("Excel 文件中没有有效数据");
+
+    const jsonData = rawData.map(sanitizeRecord);
+    log.textContent = `读取到 ${jsonData.length} 条记录，正在上传...\n`;
+
+    const res = await fetch("/api_5/cert-batch", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ records: jsonData })
+    });
+
+    const result = await res.json();
+    if (result.success) {
+      log.textContent += `✅ 成功导入 ${result.count || jsonData.length} 条记录\n`;
+      insertedIds = result.ids || [];
+
+      if (!Array.isArray(insertedIds)) insertedIds = [];
+
+      if (insertedIds.length === 0) {
+        const latestRes = await fetch("/api_5/cert-latest");
+        const latest = await latestRes.json();
+        if (latest.success && typeof latest.id === "number") {
+          const maxId = latest.id;
+          const count = jsonData.length;
+          const startId = maxId - count + 1;
+          if (startId <= 0) return log.textContent += `❗ 计算起始 ID 异常（startId=${startId}）\n`;
+
+          insertedIds = [];
+          for (let i = startId; i <= maxId; i++) {
+            insertedIds.push(i);
+          }
+        } else {
+          return log.textContent += `⚠️ cert-latest 接口无效返回，无法获取最大 ID\n`;
+        }
+      }
+
+      if (insertedIds.length > 0) {
+        await showQrLinksAndZip(insertedIds, jsonData);
+      } else {
+        log.textContent += `⚠️ 无法获取证书 ID\n`;
+      }
+
+    } else {
+      log.textContent += `❌ 导入失败：${result.error || "未知错误"}\n`;
+    }
+
+  } catch (err) {
+    console.error("处理过程中发生错误：", err);
+    log.textContent += `❌ 程序异常：${err.message}\n`;
+  }
+}
+
+async function showQrLinksAndZip(ids, records) {
+  const recordsDiv = document.getElementById("records");
+  recordsDiv.innerHTML = "";
+  const zip = new JSZip();
+
+  for (let i = 0; i < ids.length; i++) {
+    const id = ids[i];
+    const record = records[i] || {};
+    const url = `${location.origin}/list.html?id=${id}`;
+    const certNo = record.certificate_number || `id_${id}`;
+    const fileName = `${certNo}.png`;
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "record";
+
+    const qrCanvas = document.createElement("canvas");
+    await QRCode.toCanvas(qrCanvas, url, { margin: 0, width: 77.09 });
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.target = "_blank";
+    link.textContent = url;
+
+    const qrDiv = document.createElement("div");
+    qrDiv.className = "qrcode";
+    qrDiv.appendChild(qrCanvas);
+    qrDiv.appendChild(link);
+
+    wrapper.appendChild(document.createTextNode(`证书编号: ${certNo}`));
+    wrapper.appendChild(qrDiv);
+    recordsDiv.appendChild(wrapper);
+
+    const dataUrl = qrCanvas.toDataURL("image/png");
+    const base64 = dataUrl.split(',')[1];
+    zip.file(fileName, base64, { base64: true });
+  }
+
+  zip.generateAsync({ type: "blob" }).then(content => {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(content);
+    a.download = "qrcodes.zip";
+    a.click();
+  });
+}
+</script>
+</body>
+</html>

@@ -44,7 +44,7 @@
     const pageSize = 30;
 
     async function fetchCerts() {
-      const res = await fetch('/api_5/cert-all5'); // ✅ 使用 certificates5 的接口
+      const res = await fetch('/api_5/cert-all'); // ✅ 使用 certificates5 的接口
       const result = await res.json();
       if (!result.success) {
         alert('加载失败');
@@ -132,7 +132,7 @@
       inputs.forEach(input => {
         data[input.dataset.key] = input.value.trim();
       });
-      const res = await fetch('/api_5/cert-update5', {
+      const res = await fetch('/api_5/cert-update', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)

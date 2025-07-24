@@ -29,7 +29,7 @@
         <th>管理编号</th>
         <th>校准日期</th>
         <th>证书编号</th>
-        <th>批次ID</th>
+        <th>是否有效</th>
         <th>操作</th>
       </tr>
     </thead>
@@ -74,7 +74,7 @@
           <td><input type="text" value="${row.asset_number || ''}" data-key="asset_number" /></td>
           <td><input type="text" value="${row.calibration_date || ''}" data-key="calibration_date" /></td>
           <td><input type="text" value="${row.certificate_number || ''}" data-key="certificate_number" /></td>
-          <td><code>${row.batch_id || ''}</code></td>
+          <td><code>${row.status || ''}</code></td>
           <td>
             <button onclick="updateCert(${row.id}, this)">保存</button>
             <button onclick="deleteCert(${row.id})">删除</button>

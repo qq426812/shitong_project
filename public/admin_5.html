@@ -44,7 +44,7 @@
     const pageSize = 30;
 
     async function fetchCerts() {
-      const res = await fetch('/api/cert-all5'); // ✅ 使用 certificates5 的接口
+      const res = await fetch('/api_5/cert-all5'); // ✅ 使用 certificates5 的接口
       const result = await res.json();
       if (!result.success) {
         alert('加载失败');
@@ -132,7 +132,7 @@
       inputs.forEach(input => {
         data[input.dataset.key] = input.value.trim();
       });
-      const res = await fetch('/api/cert-update5', {
+      const res = await fetch('/api_5/cert-update5', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -144,7 +144,7 @@
 
     async function deleteCert(id) {
       if (!confirm("确定要删除这条记录吗？")) return;
-      const res = await fetch('/api/cert-delete?id=' + id, { method: 'DELETE' });
+      const res = await fetch('/api_5/cert-delete?id=' + id, { method: 'DELETE' });
       const result = await res.json();
       if (result.success) {
         alert("删除成功");
@@ -170,7 +170,7 @@
 
       for (const checkbox of selected) {
         const id = checkbox.dataset.id;
-        await fetch('/api/cert-delete?id=' + id, { method: 'DELETE' });
+        await fetch('/api_5/cert-delete?id=' + id, { method: 'DELETE' });
       }
 
       alert("批量删除完成");

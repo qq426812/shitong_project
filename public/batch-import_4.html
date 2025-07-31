@@ -25,15 +25,14 @@
 <script>
 let insertedIds = [];
 
-function sanitizeRecord(rec) {
+  function sanitizeRecord(rec) {
   const fix = val => (typeof val === "number" ? String(val).replace(/\.0$/, "") : String(val || "").trim());
 
   return {
     ...rec,
     "出厂编号": fix(rec["出厂编号"]),
     "管理编号": fix(rec["管理编号"]),
-    "证书编号": fix(rec["证书编号"])
-    
+    "证书编号": fix(rec["证书编号"])  
   };
 }
 

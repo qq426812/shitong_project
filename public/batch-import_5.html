@@ -62,6 +62,7 @@ async function handleImport() {
     if (!rawData.length) return alert("Excel 文件中没有有效数据");
 
     const jsonData = rawData.map(sanitizeRecord);
+    console.log(jsonData);
     log.textContent = `读取到 ${jsonData.length} 条记录，正在上传...\n`;
 
     const res = await fetch("/api_5/cert-batch", {

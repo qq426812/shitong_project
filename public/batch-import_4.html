@@ -30,9 +30,9 @@ let insertedIds = [];
 
   return {
     ...rec,
-    "出厂编号": fix(rec["出厂编号"]),
-    "管理编号": fix(rec["管理编号"]),
-    "证书编号": fix(rec["证书编号"])  
+    "serial": fix(rec["serial"]),
+    "management": fix(rec["management"]),
+    "certificate_number": fix(rec["certificate_number"])  
   };
 }
 

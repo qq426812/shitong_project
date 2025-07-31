@@ -91,6 +91,7 @@ async function handleImport() {
 
         // 🧹 执行字段清洗
     jsonData = jsonData.map(sanitizeRecord);
+   console.log(jsonData);
     log.textContent = `读取到 ${jsonData.length} 条记录，正在上传...\n`;
 
     const res = await fetch("/api_4/cert-batch", {

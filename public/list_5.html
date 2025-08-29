@@ -209,7 +209,8 @@
     }
 
 
-    #loading-mask {
+  /* 全黑蒙版 */
+#loading-mask {
     position: fixed;
     top:0;
     left:0;
@@ -222,14 +223,22 @@
     z-index: 9999;
 }
 
+/* 容器垂直排列旋转圈和文字 */
+.spinner-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 /* 旋转圆圈 */
 .spinner {
-    border: 8px solid rgba(255, 255, 255, 0.2); /* 灰白圈圈背景 */
+    border: 8px solid rgba(255, 255, 255, 0.2); /* 灰白圈背景 */
     border-top: 8px solid #fff; /* 白色前景 */
     border-radius: 50%;
     width: 60px;
     height: 60px;
     animation: spin 1s linear infinite;
+    margin-bottom: 15px; /* 圆圈和文字间距 */
 }
 
 /* 旋转动画 */
@@ -237,13 +246,23 @@
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+/* 加载文字 */
+.loading-text {
+    color: #fff;
+    font-size: 20px;
+    font-weight: bold;
+}
 </style>
 </head>
 <body>
    
 
 <div id="loading-mask">
-  <div class="spinner"></div>
+  <div class="spinner-container">
+    <div class="spinner"></div>
+    <div class="loading-text">加载中</div>
+  </div>
 </div>
 
 <div class="container" >
@@ -362,6 +381,7 @@ loadCertData();
 
 </body>
 </html>
+
 
 
 

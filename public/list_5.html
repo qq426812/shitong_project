@@ -334,7 +334,7 @@ async function loadCertData() {
     }
     // 数据和图片都加载完毕，显示页面
     document.getElementById('loading').style.display = 'none';
-    document.querySelector('.container').style.display = 'block';
+    document.querySelector('.container').style.removeProperty('display');
 }
 
 loadCertData();
@@ -342,6 +342,7 @@ loadCertData();
 
 </body>
 </html>
+
 
 
 

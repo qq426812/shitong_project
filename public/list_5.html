@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+我想加载完这代码里面的图片，然后在显示：<!DOCTYPE html>
 <html lang="zh">
 <head>
 <meta charset="UTF-8" />
@@ -12,7 +12,7 @@
         }
         .container {
             max-width: 900px;
-            background-image: url(https://dzhttt.dpdns.org/proxy/proxy?url=http://www.jj800.org/Content/ImgCert/certbg3.jpg);
+            background-image: url(https://dzhttt.dpdns.org/proxy/proxy?url=http://www.jj800.org/Content/ImgCert/certbg2.jpg);
             background-repeat: repeat;
             color: white;
             background-size: cover;
@@ -286,7 +286,7 @@ async function loadCertData() {
 
         const data = result.data;
 
-        // 状态展示
+        // 状态展示，如果状态为空或不是"有效"，则显示灰色“无效”
         const statusTextEl = document.getElementById('status-text');
         const statusEl = document.getElementById('status');
         if (data.status && data.status === '有效') {
@@ -301,3 +301,19 @@ async function loadCertData() {
 
         document.getElementById('certificate_unit').textContent = data.certificate_unit || '/';
         document.getElementById('certificate_number').textContent = data.certificate_number || '/';
+        document.getElementById('instrument_name').textContent = data.instrument_name || '/';
+        document.getElementById('model_spec').textContent = data.model_spec || '/';
+        document.getElementById('serial_number').textContent = data.serial_number || '/';
+        document.getElementById('asset_number').textContent = data.asset_number || '/';
+        document.getElementById('calibration_date').textContent = data.calibration_date || '/';
+
+    } catch (error) {
+        alert('请求接口失败：' + error.message);
+    }
+}
+
+loadCertData();
+</script>
+
+</body>
+</html>

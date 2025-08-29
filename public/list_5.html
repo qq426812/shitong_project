@@ -5,15 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>计检800客服平台</title>
 <style>
-    /* 页面初始隐藏，等图片加载完成后再显示 */
-    body {
-        opacity: 0;
-        transition: opacity 0.5s ease-in;
-    }
-    body.show {
-        opacity: 1;
-    }
-
     @media screen and (min-width: 768px) {
         body {
             background-image: none !important;
@@ -21,7 +12,7 @@
         }
         .container {
             max-width: 900px;
-            background-image: url(https://image.slidesdocs.com/responsive-images/docs/simple-yet-dynamic-business-technology-advertising-with-blue-gradient-page-border-background-word-template_614fee7c17__1131_1600.jpg);
+            background-image: url(https://dzhttt.dpdns.org/proxy/proxy?url=http://www.jj800.org/Content/ImgCert/certbg3.jpg);
             background-repeat: repeat;
             color: white;
             background-size: cover;
@@ -310,61 +301,3 @@ async function loadCertData() {
 
         document.getElementById('certificate_unit').textContent = data.certificate_unit || '/';
         document.getElementById('certificate_number').textContent = data.certificate_number || '/';
-        document.getElementById('instrument_name').textContent = data.instrument_name || '/';
-        document.getElementById('model_spec').textContent = data.model_spec || '/';
-        document.getElementById('serial_number').textContent = data.serial_number || '/';
-        document.getElementById('asset_number').textContent = data.asset_number || '/';
-        document.getElementById('calibration_date').textContent = data.calibration_date || '/';
-
-    } catch (error) {
-        alert('请求接口失败：' + error.message);
-    }
-}
-
-// 等待所有图片（包括背景图）加载完成
-function allImagesLoaded(callback) {
-  const imgs = Array.from(document.images);
-  const bgUrls = [];
-  const allEls = document.querySelectorAll('*');
-
-  allEls.forEach(el => {
-    const bg = window.getComputedStyle(el).backgroundImage;
-    if (bg && bg !== 'none' && bg.startsWith('url')) {
-      const url = bg.slice(5, -2);
-      bgUrls.push(url);
-    }
-  });
-
-  const allUrls = [...imgs.map(img => img.src), ...bgUrls];
-  let loaded = 0;
-
-  function checkDone() {
-    loaded++;
-    if (loaded >= allUrls.length) {
-      callback();
-    }
-  }
-
-  if (allUrls.length === 0) {
-    callback();
-    return;
-  }
-
-  allUrls.forEach(url => {
-    const img = new Image();
-    img.onload = checkDone;
-    img.onerror = checkDone;
-    img.src = url;
-  });
-}
-
-window.addEventListener("load", () => {
-  allImagesLoaded(() => {
-    document.body.classList.add("show");
-    loadCertData(); // 确保图片加载后再拉取数据
-  });
-});
-</script>
-
-</body>
-</html>

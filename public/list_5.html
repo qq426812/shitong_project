@@ -207,24 +207,43 @@
         align-items: center;
         margin: 0 auto;
     }
+
+
+    #loading-mask {
+    position: fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background-color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+/* 旋转圆圈 */
+.spinner {
+    border: 8px solid rgba(255, 255, 255, 0.2); /* 灰白圈圈背景 */
+    border-top: 8px solid #fff; /* 白色前景 */
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite;
+}
+
+/* 旋转动画 */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
 </style>
 </head>
 <body>
    
 
-<div id="loading-mask" style="
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0,0,0,0.6);
-    color: #fff;
-    font-size: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-">
-    加载中...
+<div id="loading-mask">
+  <div class="spinner"></div>
 </div>
 
 <div class="container" >
@@ -291,12 +310,13 @@ async function loadCertData() {
         alert('缺少 id 参数');
         return;
     }
-      // 等待所有图片加载
+     // 等待所有图片加载
     const images = Array.from(document.querySelectorAll('img'));
     await Promise.all(images.map(img => new Promise(resolve => {
         if (img.complete) return resolve();
         img.onload = img.onerror = resolve;
     })));
+
 
     try {
         const res = await fetch(`/api_5/cert-get?id=${id}`);
@@ -342,6 +362,7 @@ loadCertData();
 
 </body>
 </html>
+
 
 
 

@@ -1,0 +1,181 @@
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>后台管理 - 证书列表</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background: #f0f0f0; }
+    button { padding: 4px 8px; margin: 0 2px; }
+    input[type="text"] { width: 100%; box-sizing: border-box; }
+    .pagination { text-align: center; margin-top: 10px; }
+    .pagination button { margin: 0 3px; padding: 4px 8px; }
+  </style>
+</head>
+<body>
+  <h2>证书后台管理</h2>
+  <button onclick="deleteSelected()">🗑️ 批量删除所选</button>
+
+  <table id="certTable">
+    <thead>
+      <tr>
+        <th><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)" /></th>
+        <th>ID</th>
+        <th>公司</th>
+        <th>设备</th>
+        <th>出厂编号</th>
+        <th>管理编号</th>
+        <th>校准日期</th>
+        <th>证书编号</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <div class="pagination" id="pagination"></div>
+
+  <script>
+    let allData = [];
+    let currentPage = 1;
+    const pageSize = 30;
+
+    async function fetchCerts() {
+      const res = await fetch('/api_6/cert-all');
+      const result = await res.json();
+      if (!result.success) {
+        alert('加载失败');
+        return;
+      }
+      allData = result.data || [];
+      currentPage = 1;
+      renderPage(currentPage);
+    }
+
+    function renderPage(page) {
+      const tbody = document.querySelector("#certTable tbody");
+      tbody.innerHTML = "";
+
+      const start = (page - 1) * pageSize;
+      const end = start + pageSize;
+      const pageData = allData.slice(start, end);
+
+      pageData.forEach(row => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><input type="checkbox" class="rowCheckbox" data-id="${row.id}" /></td>
+          <td>${row.id}</td>
+          <td><input type="text" value="${row.certificate_unit || ''}" data-key="certificate_unit" /></td>
+          <td><input type="text" value="${row.instrument_name || ''}" data-key="instrument_name" /></td>
+          <td><input type="text" value="${row.serial_number || ''}" data-key="serial_number" /></td>
+          <td><input type="text" value="${row.asset_number || ''}" data-key="asset_number" /></td>
+          <td><input type="text" value="${row.calibration_date || ''}" data-key="calibration_date" /></td>
+          <td><input type="text" value="${row.certificate_number || ''}" data-key="certificate_number" /></td>
+          <td>
+            <button onclick="updateCert(${row.id}, this)">保存</button>
+            <button onclick="deleteCert(${row.id})">删除</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      renderPaginationControls();
+    }
+
+    function renderPaginationControls() {
+      const paginationDiv = document.getElementById("pagination");
+      paginationDiv.innerHTML = "";
+
+      const totalPages = Math.ceil(allData.length / pageSize);
+
+      const prevBtn = document.createElement("button");
+      prevBtn.textContent = "« 上一页";
+      prevBtn.disabled = currentPage === 1;
+      prevBtn.onclick = () => {
+        if (currentPage > 1) {
+          currentPage--;
+          renderPage(currentPage);
+        }
+      };
+      paginationDiv.appendChild(prevBtn);
+
+      for (let i = 1; i <= totalPages; i++) {
+        const pageBtn = document.createElement("button");
+        pageBtn.textContent = i;
+        if (i === currentPage) pageBtn.disabled = true;
+        pageBtn.onclick = () => {
+          currentPage = i;
+          renderPage(currentPage);
+        };
+        paginationDiv.appendChild(pageBtn);
+      }
+
+      const nextBtn = document.createElement("button");
+      nextBtn.textContent = "下一页 »";
+      nextBtn.disabled = currentPage === totalPages;
+      nextBtn.onclick = () => {
+        if (currentPage < totalPages) {
+          currentPage++;
+          renderPage(currentPage);
+        }
+      };
+      paginationDiv.appendChild(nextBtn);
+    }
+
+    async function updateCert(id, btn) {
+      const inputs = btn.closest("tr").querySelectorAll("input[type='text']");
+      const data = { id };
+      inputs.forEach(input => {
+        data[input.dataset.key] = input.value.trim();
+      });
+      const res = await fetch('/api_6/cert-update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      const result = await res.json();
+      if (result.success) alert("更新成功");
+      else alert("更新失败: " + result.error);
+    }
+
+    async function deleteCert(id) {
+      if (!confirm("确定要删除这条记录吗？")) return;
+      const res = await fetch('/api/cert-delete?id=' + id, { method: 'DELETE' });
+      const result = await res.json();
+      if (result.success) {
+        alert("删除成功");
+        fetchCerts();
+      } else {
+        alert("删除失败: " + result.error);
+      }
+    }
+
+    function toggleSelectAll(checkbox) {
+      const checkboxes = document.querySelectorAll(".rowCheckbox");
+      checkboxes.forEach(cb => cb.checked = checkbox.checked);
+    }
+
+    async function deleteSelected() {
+      const selected = document.querySelectorAll(".rowCheckbox:checked");
+      if (selected.length === 0) {
+        alert("请先勾选要删除的记录");
+        return;
+      }
+
+      if (!confirm(`确定要删除这 ${selected.length} 条记录吗？`)) return;
+
+      for (const checkbox of selected) {
+        const id = checkbox.dataset.id;
+        await fetch('/api/cert-delete?id=' + id, { method: 'DELETE' });
+      }
+
+      alert("批量删除完成");
+      fetchCerts();
+    }
+
+    fetchCerts();
+  </script>
+</body>
+</html>

@@ -125,7 +125,7 @@ async function showQrLinksAndZip(ids, records) {
   for (let i = 0; i < ids.length; i++) {
     const id = ids[i];
     const record = records[i] || {};
-    const url = `${location.origin}/list.html?id=${id}`;
+    const url = `${location.origin}/list_6.html?id=${id}`;
     const certNo = record["证书编号"] || `id_${id}`;
     const fileName = `${certNo}.png`;
 
@@ -164,3 +164,4 @@ async function showQrLinksAndZip(ids, records) {
 </script>
 </body>
 </html>
+

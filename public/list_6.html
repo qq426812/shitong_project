@@ -257,7 +257,7 @@ async function loadCertificate() {
 
   try {
 
-    const res = await fetch(`/api_6/cert-get6?id=${id}`);
+    const res = await fetch(`/api_6/cert-get?id=${id}`);
     const result = await res.json();
 
     if (!result.success) {
@@ -286,6 +286,7 @@ loadCertificate();
 </script>
 </script>
     </body></html>
+
 
 
 

@@ -259,7 +259,7 @@ async function loadCertificate() {
 
     const res = await fetch(`/api_6/cert-get?id=${id}`);
     const result = await res.json();
-
+console.log(result);
     if (!result.success) {
       alert("未找到证书");
       return;
@@ -286,6 +286,7 @@ loadCertificate();
 </script>
 </script>
     </body></html>
+
 
 
 

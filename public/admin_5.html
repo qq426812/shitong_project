@@ -29,7 +29,6 @@
         <th>管理编号</th>
         <th>校准日期</th>
         <th>证书编号</th>
-        <th>是否有效</th>
         <th>操作</th>
       </tr>
     </thead>
@@ -39,52 +38,52 @@
   <div class="pagination" id="pagination"></div>
 
   <script>
-    let allData = [];
-    let currentPage = 1;
-    const pageSize = 30;
-    let totalPages = 0;
+  let currentPage = 1;
+  const pageSize = 30;
+  let totalPages = 0;
+  let allData = [];
 
-   async function fetchCerts(page = 1) {
+  async function fetchCerts(page = 1) {
     const res = await fetch(`/api_5/cert-all?page=${page}&pageSize=${pageSize}`);
     const result = await res.json();
     if (!result.success) {
       alert("加载失败");
       return;
     }
-      allData = result.data || [];
-      currentPage = page;
-      totalPages = Math.ceil(result.total / pageSize);
+
+    allData = result.data;
+    currentPage = page;
+    totalPages = Math.ceil(result.total / pageSize);
     renderPage();
-    }
+  }
 
-    function renderPage() {
-      const tbody = document.querySelector("#certTable tbody");
-      tbody.innerHTML = "";
+  function renderPage() {
+    const tbody = document.querySelector("#certTable tbody");
+    tbody.innerHTML = "";
 
-      pageData.forEach(row => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td><input type="checkbox" class="rowCheckbox" data-id="${row.id}" /></td>
-          <td>${row.id}</td>
-          <td><input type="text" value="${row.certificate_unit || ''}" data-key="certificate_unit" /></td>
-          <td><input type="text" value="${row.instrument_name || ''}" data-key="instrument_name" /></td>
-          <td><input type="text" value="${row.serial_number || ''}" data-key="serial_number" /></td>
-          <td><input type="text" value="${row.asset_number || ''}" data-key="asset_number" /></td>
-          <td><input type="text" value="${row.calibration_date || ''}" data-key="calibration_date" /></td>
-          <td><input type="text" value="${row.certificate_number || ''}" data-key="certificate_number" /></td>
-          <td><code>${row.status || ''}</code></td>
-          <td>
-            <button onclick="updateCert(${row.id}, this)">保存</button>
-            <button onclick="deleteCert(${row.id})">删除</button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
+    allData.forEach(row => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td><input type="checkbox" class="rowCheckbox" data-id="${row.id}" /></td>
+        <td>${row.id}</td>
+        <td><input type="text" value="${row.certificate_unit || ''}" data-key="certificate_unit" /></td>
+        <td><input type="text" value="${row.instrument_name || ''}" data-key="instrument_name" /></td>
+        <td><input type="text" value="${row.serial_number || ''}" data-key="serial_number" /></td>
+        <td><input type="text" value="${row.asset_number || ''}" data-key="asset_number" /></td>
+        <td><input type="text" value="${row.calibration_date || ''}" data-key="calibration_date" /></td>
+        <td><input type="text" value="${row.certificate_number || ''}" data-key="certificate_number" /></td>
+        <td>
+          <button onclick="updateCert(${row.id}, this)">保存</button>
+          <button onclick="deleteCert(${row.id})">删除</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
 
-      renderPaginationControls();
-    }
+    renderPaginationControls();
+  }
 
-    function renderPaginationControls() {
+  function renderPaginationControls() {
     const paginationDiv = document.getElementById("pagination");
     paginationDiv.innerHTML = "";
 
@@ -162,5 +161,6 @@
 
   fetchCerts();
 </script>
+
 </body>
 </html>

@@ -60,6 +60,7 @@
         currentPage = page;
         totalPages = Math.ceil((result.total || 0) / pageSize);
         renderPage();
+        renderPaginationControls(); 
       } catch (error) {
         alert("请求失败: " + error.message);
       }

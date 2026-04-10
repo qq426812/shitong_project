@@ -45,10 +45,10 @@
   <script>
     let currentPage = 1;
     const pageSize = 30;
-    let totalPages = 1;
+    let totalPages = 0;
+    let allData = [];
 
     async function fetchCerts(page = 1) {
-      currentPage = page;
       try {
         const res = await fetch(`/api_3/cert-all?page=${page}&pageSize=${pageSize}`);
         const result = await res.json();
@@ -56,19 +56,20 @@
           alert('加载失败: ' + (result.error || '未知错误'));
           return;
         }
-        renderPage(result.data || []);
+        allData = result.data || [];
+        currentPage = page;
         totalPages = Math.ceil((result.total || 0) / pageSize);
-        renderPaginationControls();
+        renderPage();
       } catch (error) {
         alert("请求失败: " + error.message);
       }
     }
 
-    function renderPage(pageData) {
+    function renderPage() {
       const tbody = document.querySelector("#certTable tbody");
       tbody.innerHTML = "";
 
-      pageData.forEach(row => {
+      allData.forEach(row => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td><input type="checkbox" class="rowCheckbox" data-id="${row.id}" /></td>
@@ -90,7 +91,8 @@
         `;
         tbody.appendChild(tr);
       });
-      document.getElementById('selectAll').checked = false; // 清空全选状态
+
+      document.getElementById('selectAll').checked = false;
     }
 
     function renderPaginationControls() {
@@ -180,7 +182,6 @@
       if (!confirm(`确定要删除这 ${selected.length} 条记录吗？`)) return;
 
       try {
-        // 并发执行删除，提升效率
         await Promise.all(Array.from(selected).map(cb => {
           const id = cb.dataset.id;
           return fetch('/api_3/cert-delete?id=' + id, { method: 'DELETE' });
@@ -192,7 +193,6 @@
       }
     }
 
-    // 初始化加载第一页
     fetchCerts(1);
   </script>
 </body>

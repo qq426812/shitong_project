@@ -84,29 +84,36 @@
   }
 
   function renderPaginationControls() {
-    const paginationDiv = document.getElementById("pagination");
-    paginationDiv.innerHTML = "";
+  const paginationDiv = document.getElementById("pagination");
+  paginationDiv.innerHTML = "";
 
-    const prevBtn = document.createElement("button");
-    prevBtn.textContent = "« 上一页";
-    prevBtn.disabled = currentPage === 1;
-    prevBtn.onclick = () => fetchCerts(currentPage - 1);
-    paginationDiv.appendChild(prevBtn);
+  const prevBtn = document.createElement("button");
+  prevBtn.textContent = "« 上一页";
+  prevBtn.disabled = currentPage === 1;
+  prevBtn.onclick = () => fetchCerts(currentPage - 1);
+  paginationDiv.appendChild(prevBtn);
 
-    for (let i = 1; i <= totalPages; i++) {
-      const pageBtn = document.createElement("button");
-      pageBtn.textContent = i;
-      if (i === currentPage) pageBtn.disabled = true;
-      pageBtn.onclick = () => fetchCerts(i);
-      paginationDiv.appendChild(pageBtn);
-    }
-
-    const nextBtn = document.createElement("button");
-    nextBtn.textContent = "下一页 »";
-    nextBtn.disabled = currentPage === totalPages;
-    nextBtn.onclick = () => fetchCerts(currentPage + 1);
-    paginationDiv.appendChild(nextBtn);
+  const maxPageButtons = 7;
+  let startPage = Math.max(1, currentPage - Math.floor(maxPageButtons / 2));
+  let endPage = Math.min(totalPages, startPage + maxPageButtons - 1);
+  if (endPage - startPage < maxPageButtons - 1) {
+    startPage = Math.max(1, endPage - maxPageButtons + 1);
   }
+
+  for (let i = startPage; i <= endPage; i++) {
+    const pageBtn = document.createElement("button");
+    pageBtn.textContent = i;
+    pageBtn.disabled = (i === currentPage);
+    pageBtn.onclick = () => fetchCerts(i);
+    paginationDiv.appendChild(pageBtn);
+  }
+
+  const nextBtn = document.createElement("button");
+  nextBtn.textContent = "下一页 »";
+  nextBtn.disabled = currentPage === totalPages;
+  nextBtn.onclick = () => fetchCerts(currentPage + 1);
+  paginationDiv.appendChild(nextBtn);
+}
 
   async function updateCert(id, btn) {
     const inputs = btn.closest("tr").querySelectorAll("input[type='text']");

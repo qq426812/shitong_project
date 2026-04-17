@@ -7,8 +7,8 @@ export async function onRequestPost({ request, env }) {
       serial_number,
       asset_number,
       calibration_date,
-      certificate_number,
-      batch_id // 新增字段
+      certificate_number
+      
     } = await request.json();
 
     if (!id) {
@@ -26,7 +26,7 @@ export async function onRequestPost({ request, env }) {
         asset_number = ?,
         calibration_date = ?,
         certificate_number = ?,
-        batch_id = ?
+        
       WHERE id = ?
     `);
 

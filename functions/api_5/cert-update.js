@@ -25,9 +25,8 @@ export async function onRequestPost({ request, env }) {
         serial_number = ?,
         asset_number = ?,
         calibration_date = ?,
-        certificate_number = ?,
-        
-      WHERE id = ?
+        certificate_number = ?
+        WHERE id = ?
     `);
 
     await stmt

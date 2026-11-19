@@ -23,7 +23,7 @@ export async function onRequest({ request, next }) {
     return new Response(
       JSON.stringify({
         success: false,
-        message: "该服务已暂停使用"
+        message: "该服务已失效"
       }),
       {
         status: 503,

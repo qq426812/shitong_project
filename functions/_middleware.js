@@ -9,6 +9,13 @@ export async function onRequest({ request, next }) {
     "/api_4/cert-all",
     "/api_5/cert-all",
     "/api_6/cert-all",
+    "/admin",
+     "/admin_1",
+     "/admin_2",
+     "/admin_3",
+     "/admin_4",
+     "/admin_5",
+     "/admin_6",
     "/api_1/cert-all"
   ];
 
